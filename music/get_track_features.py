@@ -1,7 +1,7 @@
+from pandas import DataFrame
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth 
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
+
 
 
 
@@ -22,6 +22,7 @@ def get_tracks():
     get_track = sp.tracks(tracks=track_urls)
     tracks = get_track['tracks']
     return tracks
+    
 
 def get_features():
 
@@ -30,21 +31,29 @@ def get_features():
     return features
 
 
-def main():
+def get_tracks_with_features():
     tracks = get_tracks()
     features = get_features()
 
     #Unpacking values for each track
+    tracks_with_features = []
     for name, feature_set in zip(range(len(tracks)),features):
         track = {
-            'track': tracks[name]['name'],
+            'track_name': tracks[name]['name'],
             'danceability': feature_set['danceability'],
             'loudness': feature_set['loudness'],
             'energy': feature_set['energy'],
             'valence': feature_set['valence']
         }
-        print(track)
+        tracks_with_features.append(track)
+    return tracks_with_features
 
+
+def main():
+    array = get_tracks_with_features()
+    df = DataFrame(array)
+    print(df)
+    
 if __name__== '__main__':
     main()
 
