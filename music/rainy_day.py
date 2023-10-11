@@ -1,39 +1,54 @@
+import random
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
-# Set up your Spotify API credentials
-
+#Autenticatinon
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(redirect_uri='http://localhost:8080'))
 
-# Define your feature criteria
-valence_range = (0.1, 0.5)
-energy_range = (0.2, 0.6)
-instrumentalness_range = (0.5, 1.0)
-acousticness_range = (0.6, 1.0)
-loudness_max = -10  # Adjust as needed
 
-# Search for tracks that match the criteria
-results = sp.search(q='rainy day', type='track', limit=10)  # Replace 'rainy day' with your desired search query
+#Getting an array of all available genres
+genres = sp.recommendation_genre_seeds()
+genres = genres['genres']
 
-for track in results['tracks']['items']:
-    track_id = track['id']
-    features = sp.audio_features([track_id])[0]
+#Randomly choose 5 genres
+seed_genres = random.choices(population=genres,k=5)
+
+#Define criterea for songs that would suit the playlist
+data_recomm = sp.recommendations(
+    limit=40,
+    seed_genres=seed_genres,
+    min_popularity=30,
+    max_dancebility=0.3,
+    max_loudness=0.5,
+    max_energy=0.5, 
+    max_valence=0.3
+    )
+recommendation_tracks = data_recomm['tracks']
+
+#Search for tracks that have "rain" in their names
+data_search = sp.search(q='rain', type='track', limit=10)
+rain_results = data_search['tracks']['items']
+
+#Combine recommended tracks and tracks from search
+final_list = recommendation_tracks + rain_results
+
+
+print(f"Your current mood playlist \nchosen from favorite genres ({','.join(genre for genre in seed_genres)})\
+      and songs that have 'rain' in their names):\n")
+
+#Traverse through the list of track objects and print the info
+for num,track in enumerate(final_list[:5],1):
+  
+    print(f"{num}.Track name - {track['name']}")
+    print(f"Album - {track['album']['name']}")
+    print(f"Image - {track['album']['images'][1]['url']}")
+    print(f"Artist - {', '.join([artist['name'] for artist in track['artists']])}")
+    print(f"Link - {track['external_urls']['spotify']}")
+    print("\n")
     
-    if (
-        valence_range[0] <= features['valence'] <= valence_range[1] and
-        energy_range[0] <= features['energy'] <= energy_range[1] and
-        instrumentalness_range[0] <= features['instrumentalness'] <= instrumentalness_range[1] and
-        acousticness_range[0] <= features['acousticness'] <= acousticness_range[1] and
-        features['loudness'] <= loudness_max
-    ):
-        print(f"Track Name: {track['name']}")
-        print(f"Artist: {', '.join([artist['name'] for artist in track['artists']])}")
-        print(f"Valence: {features['valence']}")
-        print(f"Energy: {features['energy']}")
-        print(f"Tempo: {features['tempo']}")
-        print(f"Instrumentalness: {features['instrumentalness']}")
-        print(f"Acousticness: {features['acousticness']}")
-        print(f"Loudness: {features['loudness']}")
-        print("\n")
+
+   
     
-print('No tracks found')
+ 

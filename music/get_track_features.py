@@ -7,19 +7,17 @@ from spotipy.oauth2 import SpotifyOAuth
 
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(redirect_uri='http://localhost:8080'))
  
-#URLs of the tracks to analylze
-track_urls = [
-        'https://open.spotify.com/track/0IwXp8V7wgFCIthRh2z8Ot',
-        'https://open.spotify.com/track/0yac0FPhLRH9i9lOng3f81',
-        'https://open.spotify.com/track/1CXRwGBuGBnP8PK8oRt0UG',
-        'https://open.spotify.com/track/75ZvA4QfFiZvzhj2xkaWAh',
-        'https://open.spotify.com/track/6wf7Yu7cxBSPrRlWeSeK0Q'
-    ]
+
+results = sp.search(q='rain', type='track', limit=10)  # Replace 'rainy day' with your desired search query
+
+    
+#IDs of the tracks to analylze
+track_id = [track['id'] for track in results['tracks']['items']]
 
 def get_tracks():  
 
     #Getting an array of the tracks info 
-    get_track = sp.tracks(tracks=track_urls)
+    get_track = sp.tracks(tracks=track_id)
     tracks = get_track['tracks']
     return tracks
     
@@ -27,7 +25,7 @@ def get_tracks():
 def get_features():
 
     #Getting an array of track's features
-    features = (sp.audio_features(tracks=track_urls))
+    features = (sp.audio_features(tracks=track_id))
     return features
 
 
