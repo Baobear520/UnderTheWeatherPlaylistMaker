@@ -48,6 +48,7 @@ def get_rainy_day_playlist():
         print(f"Artist - {', '.join([artist['name'] for artist in track['artists']])}")
         print(f"Link - {track['external_urls']['spotify']}")
         print("\n")
+    return final_list
     
 
    
