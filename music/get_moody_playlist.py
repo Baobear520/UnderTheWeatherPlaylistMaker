@@ -1,10 +1,8 @@
 import random
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth 
-import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
-#Autenticatinon
+#Autentication
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(redirect_uri='http://localhost:8080'))
 
 #Getting an array of all available genres

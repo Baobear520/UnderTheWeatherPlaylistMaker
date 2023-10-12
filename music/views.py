@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .rainy_day import get_rainy_day_playlist
+from .rainy_day import add_tracks
 # Create your views here.
 
 
@@ -8,7 +8,7 @@ def home(request):
 
 
 def rainy_day(request):
-    playlist = get_rainy_day_playlist()
+    playlist = add_tracks()
     return render(
         request,
         template_name='music.html',

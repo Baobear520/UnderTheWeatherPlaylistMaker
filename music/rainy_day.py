@@ -4,10 +4,15 @@ from spotipy.oauth2 import SpotifyOAuth
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
-def get_rainy_day_playlist():
-    
-    #Autentication
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(redirect_uri='http://localhost:8080'))
+
+#Autentication
+sp = spotipy.Spotify(
+        auth_manager=SpotifyOAuth(
+            redirect_uri='http://localhost:8080',
+            scope='playlist-modify-public'
+            )
+    )
+def generate_rainy_day_playlist():
 
     #Getting an array of all available genres
     genres = sp.recommendation_genre_seeds()
@@ -34,13 +39,14 @@ def get_rainy_day_playlist():
 
     #Combine recommended tracks and tracks from search
     final_list = recommendation_tracks + rain_results
+    random.shuffle(final_list)
 
-
+    """
     print(f"Your current mood playlist \nchosen from favorite genres ({','.join(genre for genre in seed_genres)})\
-        and songs that have 'rain' in their names):\n")
+    and songs that have 'rain' in their names):\n")
 
     #Traverse through the list of track objects and print the info
-    for num,track in enumerate(final_list[:5],1):
+    for num,track in enumerate(final_list,1):
     
         print(f"{num}.Track name - {track['name']}")
         print(f"Album - {track['album']['name']}")
@@ -48,9 +54,31 @@ def get_rainy_day_playlist():
         print(f"Artist - {', '.join([artist['name'] for artist in track['artists']])}")
         print(f"Link - {track['external_urls']['spotify']}")
         print("\n")
+    """
     return final_list
-    
 
-   
+def create_playlist(): 
+    user = sp.me()
+    user_id = user['id']
+    user_name = user['display_name']
+
+    playlist = sp.user_playlist_create(
+        user=user_id,
+        name = 'Rainy Day Mood',
+        description=f"Tracks for {user_name} on a rainy day"
+    )
+    playlist_id = playlist['id']
+    return playlist_id
+
+def add_tracks():
+    items = generate_rainy_day_playlist()
+    playlist_id = create_playlist()
+    items_id = [item['id'] for item in items]
+    sp.playlist_add_items(
+        playlist_id=playlist_id,
+        items = items_id 
+        )
+    return items
     
  
+
