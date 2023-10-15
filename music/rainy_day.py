@@ -1,16 +1,15 @@
 import random
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth 
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
 
 
+MOOD = 'Rainy'
 #Autentication
 sp = spotipy.Spotify(
         auth_manager=SpotifyOAuth(
             redirect_uri='http://localhost:8080',
-            scope='playlist-modify-public'
-            )
+            scope ='playlist-modify-public'
+        )
     )
 def generate_rainy_day_playlist():
 
@@ -58,10 +57,12 @@ def generate_rainy_day_playlist():
     return final_list
 
 def create_playlist(): 
+    #Get current user's id and name
     user = sp.me()
     user_id = user['id']
     user_name = user['display_name']
 
+    #Create a playlist and grab its id
     playlist = sp.user_playlist_create(
         user=user_id,
         name = 'Rainy Day Mood',
@@ -71,14 +72,25 @@ def create_playlist():
     return playlist_id
 
 def add_tracks():
+
+    #Combine the above logic
     items = generate_rainy_day_playlist()
     playlist_id = create_playlist()
     items_id = [item['id'] for item in items]
+    #Add generated tracks to the new playlist
     sp.playlist_add_items(
         playlist_id=playlist_id,
         items = items_id 
         )
     return items
+
+def get_url():
+    my_playlists = sp.current_user_playlists()
+    for playlist in my_playlists['items']:
+        if playlist['name'] == f'{MOOD} Day Mood':
+            url = playlist['external_urls']['spotify']
+            return url
+
     
  
 

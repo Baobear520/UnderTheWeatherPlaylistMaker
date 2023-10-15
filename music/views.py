@@ -1,11 +1,13 @@
-from django.shortcuts import render
-from .rainy_day import add_tracks
-# Create your views here.
+from django.http import HttpResponseRedirect
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
+from django.shortcuts import redirect, render
+from .rainy_day import add_tracks,get_url
 
+# Create your views here.
 
 def home(request):
     return render(request, template_name='home.html')
-
 
 def rainy_day(request):
     playlist = add_tracks()
@@ -15,3 +17,7 @@ def rainy_day(request):
         context={
             'playlist': playlist
         })
+
+def redirect_to_spotify(request):
+        url = get_url()
+        return redirect(url)
