@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,8 +7,21 @@
     <title>Home</title>
 </head>
 <body>
-    <h1>Hey! Feeling rainy today, we've got a playlist for you!</h1>
-    <a href='/playlist'>Generate a Spotify playlist</a>
+    <h1>Hey! Feeling ___ today, we've got a playlist for you!</h1>
+    <h3>Create a Playlist</h3>
+
+    <form id="playlist-form">
+        {% csrf_token %}
+        <input type="text" id="playlist-name" placeholder="Enter Playlist Name" required>
+        <input type="submit" value="Create Playlist">
+    </form>
+    
+    <div id="success-message" style="display: none;">
+        <p>Great! Your new playlist is already added on Spotify. Check it out!</p>
+        <a id="spotify-link" href={{url}}>Listen on Spotify</a>
+    </div>
+    <script src="{% static 'music/main.js' %}"></script>
+</body>
     
 </body>
 </html>

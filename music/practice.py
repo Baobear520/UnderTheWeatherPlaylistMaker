@@ -12,4 +12,10 @@ sp = spotipy.Spotify(
 
 
 
+class MyException(Exception):
+    pass
+    
+
+    
+
 

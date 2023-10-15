@@ -1,6 +1,8 @@
 import random
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth 
+from django.core.exceptions import MultipleObjectsReturned
+from .practice import MyException
 
 
 MOOD = 'Rainy'
@@ -56,26 +58,35 @@ def generate_rainy_day_playlist():
     """
     return final_list
 
+"""
 def create_playlist(): 
     #Get current user's id and name
     user = sp.me()
     user_id = user['id']
     user_name = user['display_name']
 
-    #Create a playlist and grab its id
-    playlist = sp.user_playlist_create(
-        user=user_id,
-        name = 'Rainy Day Mood',
-        description=f"Tracks for {user_name} on a rainy day"
-    )
-    playlist_id = playlist['id']
-    return playlist_id
+    #Check if a playlist with the desired name already exists
+    name = f'{MOOD} Day Mood'
+    my_playlists = sp.current_user_playlists()
+    
+    playlist_names = [playlist['name'] for playlist in my_playlists['items']]
+    if name not in playlist_names:
+        #Create a playlist and grab its id
+        playlist = sp.user_playlist_create(
+            user=user_id,
+            name = 'Rainy Day Mood',
+            description=f"Tracks for {user_name} on a rainy day"
+        )
+        playlist_id = playlist['id']
+        return playlist_id
+    else:
+        raise MyException('Playlist with this name already exists')
 
 def add_tracks():
 
     #Combine the above logic
-    items = generate_rainy_day_playlist()
     playlist_id = create_playlist()
+    items = generate_rainy_day_playlist()
     items_id = [item['id'] for item in items]
     #Add generated tracks to the new playlist
     sp.playlist_add_items(
@@ -83,13 +94,10 @@ def add_tracks():
         items = items_id 
         )
     return items
+"""
 
-def get_url():
-    my_playlists = sp.current_user_playlists()
-    for playlist in my_playlists['items']:
-        if playlist['name'] == f'{MOOD} Day Mood':
-            url = playlist['external_urls']['spotify']
-            return url
+   
+
 
     
  
