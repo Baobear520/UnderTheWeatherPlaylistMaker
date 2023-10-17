@@ -9,11 +9,17 @@ sp = spotipy.Spotify(
         scope='playlist-modify-public'
         )
     )
+user = sp.me()
+user_id = user['id']
+user_name = user['display_name']
 
 
 
-class MyException(Exception):
-    pass
+
+
+
+
+
     
 
     

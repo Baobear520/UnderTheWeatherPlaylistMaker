@@ -1,8 +1,8 @@
 import random
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth 
-from django.core.exceptions import MultipleObjectsReturned
-from .practice import MyException
+
+
 
 
 MOOD = 'Rainy'

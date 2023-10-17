@@ -1,27 +1,14 @@
 <!DOCTYPE html>
-{% load static %}
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Home Page</title>
 </head>
 <body>
-    <h1>Hey! Feeling ___ today, we've got a playlist for you!</h1>
-    <h3>Create a Playlist</h3>
-
-    <form id="playlist-form">
+    <h1>Create a Playlist</h1>
+    <form action="/" method="POST"> 
         {% csrf_token %}
-        <input type="text" id="playlist-name" placeholder="Enter Playlist Name" required>
-        <input type="submit" value="Create Playlist">
-    </form>
-    
-    <div id="success-message" style="display: none;">
-        <p>Great! Your new playlist is already added on Spotify. Check it out!</p>
-        <a id="spotify-link" href={{url}}>Listen on Spotify</a>
-    </div>
-    <script src="{% static 'music/main.js' %}"></script>
-</body>
-    
+        <input type="text" name="name" placeholder="Enter your playlist name">
+        <input type="submit" value="Create playlist!">
+ </form>
 </body>
 </html>
