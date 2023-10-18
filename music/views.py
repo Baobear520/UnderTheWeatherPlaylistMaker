@@ -14,6 +14,9 @@ sp = spotipy.Spotify(
             scope ='playlist-modify-public'
         )
     )
+def login(request):
+    return render(request,'home_page.html')
+
 
 def home_view(request):
     if request.method == 'POST':
@@ -47,5 +50,5 @@ def home_view(request):
         return redirect(playlist_url)
     
     if request.method == 'GET':
-        return render(request, 'home.html')
+        return render(request, 'create_playlist.html')
     
