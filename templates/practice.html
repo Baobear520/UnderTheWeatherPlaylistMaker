@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Create playlist</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
 </head>
 <body>
-    <h1>We've got a cool playlist for you!</h1>
     <form id='playlist-form' action="/create-playlist/" method="POST"> 
         {% csrf_token %}
         <input type="text" id="playlist-name" name="name" placeholder="Enter your playlist name">

@@ -47,7 +47,7 @@ def home_view(request):
             playlist_id=playlist_id,
             items = items_id 
         )
-        return redirect(playlist_url)
+        return render(request, 'create_playlist.html',context={'spotify_link': playlist_url})
     
     if request.method == 'GET':
         return render(request, 'create_playlist.html')
