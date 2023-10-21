@@ -6,37 +6,7 @@
     <title>Document</title>
 </head>
 <body>
-    <form id='playlist-form' action="/create-playlist/" method="POST"> 
-        {% csrf_token %}
-        <input type="text" id="playlist-name" name="name" placeholder="Enter your playlist name">
-        <input type="submit" value="Create playlist">
-    </form>
-    <div id="success-message" style="display: none;" >
-        <p>Great!</p>
-        <a id="spotify-link" href={{spotify_link}}>Listen on Spotify</a>
-    </div>
-
-<script> 
-        // JavaScript to display "Great!" message and playlist link
-        document.addEventListener('DOMContentLoaded', function() {
-            const successMessage = document.getElementById('success-message');
-            const playlistForm = document.getElementById('playlist-form');
-            const playlistNameInput = document.getElementById('playlist-name');
-            const spotifyLink = document.getElementById('spotify-link');
-
-            const url = '{{ spotify_link }}';  // Get the playlist URL from the context
-            
-            // Check if the URL is not empty (playlist has been created)
-            if (url) {
-                // Hide the form
-                playlistForm.style.display = 'none';
-                
-                // Display the "Great!" message and the Spotify link
-                successMessage.style.display = 'block';
-                spotifyLink.href = url;
-                spotifyLink.style.display = 'block';
-            }
-        });
-</script>
+    <p>Great! You can find the playlist on your Spotify page. Ready to listen? </p>
+    <a id="spotify-link" href='#'>Listen on Spotify</a>
 </body>
 </html>
