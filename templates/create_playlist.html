@@ -11,43 +11,35 @@
         <input type="submit" value="Create playlist">
 
     </form>
-    <div id='error-message' style='display: none;'>
-        <p>Playlist with this name already exists. </p>
-    </div>
     <div id="success-message" style="display: none;" >
         <p>Great! You can find the playlist on your Spotify page. Ready to listen? </p>
         <a id="spotify-link" href={{spotify_link}}>Listen on Spotify</a>
     </div>
 
 <script> 
-        // JavaScript to display "Great!" message and playlist link
-        document.addEventListener('DOMContentLoaded', function() {
-            const successMessage = document.getElementById('success-message');
-            const errorMessage = document.getElementById('error-message');
-            const playlistForm = document.getElementById('playlist-form');
-            const spotifyLink = document.getElementById('spotify-link');
-            
+    document.addEventListener('DOMContentLoaded', function() {
+        const successMessage = document.getElementById('success-message');
+        const playlistForm = document.getElementById('playlist-form');
+        const playlistNameInput = document.getElementById('id_playlist_name');
+        const url = '{{ spotify_link }}';  // Get the playlist URL from the context
+        
+        
+        if (playlistForm) {
+        playlistNameInput.value = '';
+        }
+        
+        // Check if the URL is not empty (playlist has been created)
+        if (url) {
+            // Hide the form
+            playlistForm.style.display = 'none';
 
-            const names = '{{ all_playlists_names }}';
-            const name = '{{ form.name }}'
-            
-            if name in names {
-                errorMessage.style.display = 'block'
-            }
-            const url = '{{ spotify_link }}';  // Get the playlist URL from the context
-            
-            // Check if the URL is not empty (playlist has been created)
-            if (url) {
-                // Hide the form
-                playlistForm.style.display = 'none';
-                
-                // Display the "Great!" message and the Spotify link
-                successMessage.style.display = 'block';
-                spotifyLink.href = url;
-                spotifyLink.style.display = 'block';
-            
-            }
-        });
+            // Display the "Great!" message and the Spotify link
+            successMessage.style.display = 'block';
+            spotifyLink.href = url;
+            spotifyLink.style.display = 'block';
+        }
+         
+    });
 </script>
 </body>
 </html>

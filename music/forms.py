@@ -3,12 +3,36 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
 
-def validate(name):
-    if len(name) <5:
-        raise forms.ValidationError('Cannot be shorter than 5 symbols')
-   
+# Authorization
+sp = spotipy.Spotify(
+    auth_manager=SpotifyOAuth(
+        redirect_uri='http://localhost:8080',
+        scope='playlist-modify-public'
+    )
+)
 
 class PlaylistForm(forms.Form):
-    playlist_name = forms.CharField(max_length=64,validators=[validate])
+    playlist_name = forms.CharField(
+        max_length=64, 
+        widget=forms.TextInput(
+            attrs={'placeholder': 'Enter the name here'}
+        )
+    )
+
+    def clean_playlist_name(self):
+        playlist_name = self.cleaned_data['playlist_name']
+        
+        # Server-side validation if the playlist name is unique
+        all_playlists = sp.current_user_playlists()['items']
+        all_playlists_names = [playlist['name'] for playlist in all_playlists]
+
+        if playlist_name in all_playlists_names:
+            raise forms.ValidationError('This name already exists')
+        return playlist_name
+
+
+        
+    
+
 
 
