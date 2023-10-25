@@ -1,9 +1,5 @@
-from django.forms import ValidationError
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from django.http import HttpResponse, JsonResponse
-
-from django.template.response import TemplateResponse
 from django.shortcuts import redirect, render
 from .rainy_day import generate_rainy_day_playlist
 from .forms import PlaylistForm
@@ -17,7 +13,7 @@ sp = spotipy.Spotify(
         )
     )
 def login(request):
-    pass
+    return render(request,'practice.html')
 
 
 def create_playlist(request):
@@ -66,4 +62,5 @@ def create_playlist(request):
         form = PlaylistForm()
 
     return render(request, 'create_playlist.html',{'form': form})
+    
     

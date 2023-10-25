@@ -15,9 +15,12 @@ class PlaylistForm(forms.Form):
     playlist_name = forms.CharField(
         max_length=64, 
         widget=forms.TextInput(
-            attrs={'placeholder': 'Enter the name here'}
+            attrs={
+                'placeholder': 'Enter the name here'
+                }
         )
     )
+
 
     def clean_playlist_name(self):
         playlist_name = self.cleaned_data['playlist_name']

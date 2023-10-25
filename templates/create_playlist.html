@@ -9,7 +9,6 @@
         {% csrf_token %}
         {{form}}
         <input type="submit" value="Create playlist">
-
     </form>
     <div id="success-message" style="display: none;" >
         <p>Great! You can find the playlist on your Spotify page. Ready to listen? </p>
@@ -24,11 +23,9 @@
         const spotifyLink = document.getElementById('spotify-link'); // Define spotifyLink
         const url = '{{ spotify_link }}';  // Get the playlist URL from the context
         
-        
         if (playlistForm) {
         playlistNameInput.value = '';
         }
-        
         // Check if the URL is not empty (playlist has been created)
         if (url) {
             // Hide the form
