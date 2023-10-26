@@ -2,9 +2,10 @@ import os
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from django.shortcuts import redirect, render
-from .rainy_day import generate_rainy_day_playlist
+from .playlist_algorithms import generate_playlist
 from .forms import PlaylistForm
-from .credentials import ow_credentials
+from .weather import city_ID,weather_type
+
 
 #Authorization
 sp = spotipy.Spotify(
@@ -16,10 +17,19 @@ sp = spotipy.Spotify(
 
 def login(request):
     api_key = os.environ.get('OPENWEATHER_API_KEY')
-    return render(request,'practice.html', {'api_key': api_key})
+    city_id = city_ID()
+    return render(
+        request,
+        'practice.html', 
+        context={
+            'api_key': api_key,
+            'city_id': city_id,
+            }
+        )
 
 
 def create_playlist(request):
+    
     if request.method == 'POST':
         form = PlaylistForm(request.POST)
         if form.is_valid():
@@ -41,8 +51,11 @@ def create_playlist(request):
 
             #Use a __day algorithm to generate tracks for the playlist
             #Should be a choice depending on the weather
+            #weather_type = weather_type()
+            #if weather_type == do smth :
+            #elif .... do smth else
 
-            items = generate_rainy_day_playlist()
+            items = generate_playlist()
             items_id = [item['id'] for item in items]
             
             #Add generated tracks to the new playlist

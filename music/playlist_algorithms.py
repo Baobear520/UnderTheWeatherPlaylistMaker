@@ -1,11 +1,10 @@
 import random
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth 
+from .weather import weather_type
 
 
 
-
-MOOD = 'Rainy'
 #Autentication
 sp = spotipy.Spotify(
         auth_manager=SpotifyOAuth(
@@ -13,33 +12,96 @@ sp = spotipy.Spotify(
             scope ='playlist-modify-public'
         )
     )
-def generate_rainy_day_playlist():
+
+WEATHER = weather_type()
+
+def generate_playlist():
 
     #Getting an array of all available genres
     genres = sp.recommendation_genre_seeds()
     genres = genres['genres']
 
-    #Randomly choose 5 genres
-    seed_genres = random.choices(population=genres,k=5)
+    #Extract user's favorite genres from favorite artists
+    items = sp.current_user_top_artists()['items']
+    list_genres = [genre['genre'] for genre in items]
+    
+
+
+
+    #Randomly choose 2 genres
+    random_seed_genres = random.choices(population=genres,k=2)
+    
+    #Define lists of similar weather types
+    rainy = ['Thunderstorm','Drizzle','Rain']
+    cloudy = ['Clouds']
+    sunny = ['Clear']
+    snowy_or_rest = ['Snow','Atmosphere']
 
     #Define criterea for songs that would suit the playlist
-    data_recomm = sp.recommendations(
-        limit=40,
+
+
+    if WEATHER in rainy:  
         seed_genres=seed_genres,
-        min_popularity=30,
         max_dancebility=0.3,
+        min_dancebility = 0,
         max_loudness=0.5,
+        min_loudness = 0,
         max_energy=0.5, 
-        max_valence=0.3
-        )
+        min_energy = 0,
+        max_valence=0.3,
+        min_valence=0
+    elif WEATHER in cloudy:
+        seed_genres=seed_genres,
+        max_dancebility=0.5,
+        min_dancebility = 0.2,
+        max_loudness=0.7,
+        min_loudness = 0.3,
+        max_energy=0.6, 
+        min_energy = 0.2,
+        max_valence=0.5,
+        min_valence=0
+    elif WEATHER in sunny:
+        seed_genres=seed_genres,
+        max_dancebility=0.99,
+        min_dancebility = 0.5,
+        max_loudness=0.99,
+        min_loudness = 0.5,
+        max_energy=0.99, 
+        min_energy = 0.5,
+        max_valence=0.99,
+        min_valence=0.5
+    elif WEATHER in snowy_or_rest:
+        seed_genres=seed_genres,
+        max_dancebility=0.5,
+        min_dancebility = 0.2,
+        max_loudness=0.7,
+        min_loudness = 0,
+        max_energy=0.7, 
+        min_energy = 0,
+        max_valence=0.6,
+        min_valence=0
+    data_recomm = sp.recommendations(
+        limit=45,
+        seed_genres=seed_genres,
+        max_dancebility=max_dancebility,
+        min_dancebility=min_dancebility,
+        max_loudness=max_loudness,
+        min_loudness=min_loudness,
+        max_energy=max_energy, 
+        min_energy=min_energy,
+        max_valence=max_valence,
+        min_valence=min_valence,
+        min_popularity=30
+    )
+        
     recommendation_tracks = data_recomm['tracks']
 
-    #Search for tracks that have "rain" in their names
-    data_search = sp.search(q='rain', type='track', limit=10)
-    rain_results = data_search['tracks']['items']
+    #Search for tracks that have "____" in their names
+    word_search = sp.search(q=WEATHER, type='track', limit=5)
+    word_search_results = word_search['tracks']['items']
 
-    #Combine recommended tracks and tracks from search
-    final_list = recommendation_tracks + rain_results
+    #Combine recommended tracks and tracks from word search
+    final_list = recommendation_tracks + word_search_results
     random.shuffle(final_list)
 
     """
