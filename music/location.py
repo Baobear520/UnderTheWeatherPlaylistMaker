@@ -1,4 +1,5 @@
 import geocoder
+import os
 
 def my_IP_location():
     my_loc = geocoder.ip('me')

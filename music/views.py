@@ -1,9 +1,10 @@
+import os
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from django.shortcuts import redirect, render
 from .rainy_day import generate_rainy_day_playlist
 from .forms import PlaylistForm
-
+from .credentials import ow_credentials
 
 #Authorization
 sp = spotipy.Spotify(
@@ -12,8 +13,10 @@ sp = spotipy.Spotify(
             scope ='playlist-modify-public'
         )
     )
+
 def login(request):
-    return render(request,'practice.html')
+    api_key = os.environ.get('OPENWEATHER_API_KEY')
+    return render(request,'practice.html', {'api_key': api_key})
 
 
 def create_playlist(request):
