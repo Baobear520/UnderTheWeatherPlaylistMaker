@@ -1,10 +1,10 @@
 import os
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from .playlist_algorithms import generate_playlist
 from .forms import PlaylistForm
-from .weather import city_ID,weather_type
+from .weather import city_ID
 
 
 #Authorization
@@ -49,12 +49,7 @@ def create_playlist(request):
             playlist_id = playlist['id']
             playlist_url = playlist['external_urls']['spotify']
 
-            #Use a __day algorithm to generate tracks for the playlist
-            #Should be a choice depending on the weather
-            #weather_type = weather_type()
-            #if weather_type == do smth :
-            #elif .... do smth else
-
+            #Generate recommended tracks according to the weather and user's taste
             items = generate_playlist()
             items_id = [item['id'] for item in items]
             
