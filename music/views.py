@@ -37,6 +37,10 @@ def create_playlist(request):
             user_id = user['id']
             user_name = user['display_name']
 
+            #Generate recommended tracks according to the weather and user's taste
+            items = generate_playlist()
+            items_id = [item['id'] for item in items]
+            
             #Create a playlist and grab its id and url
             playlist = sp.user_playlist_create(
                             user=user_id,
@@ -45,11 +49,8 @@ def create_playlist(request):
                         )
             playlist_id = playlist['id']
             playlist_url = playlist['external_urls']['spotify']
-
+            #Passing the url into sessions
             request.session['spotify_link'] = playlist_url
-            #Generate recommended tracks according to the weather and user's taste
-            items = generate_playlist()
-            items_id = [item['id'] for item in items]
             
             #Add generated tracks to the new playlist
             sp.playlist_add_items(

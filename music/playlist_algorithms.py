@@ -109,23 +109,27 @@ def generate_playlist():
         max_valence=0.6
 
     seed_genres = get_genres_for_playlist()
+    if seed_genres:
+        #Get recommended tracks
+        try: 
+            data_recomm = sp.recommendations(
+            limit=45,
+            seed_genres=seed_genres,
+            max_dancebility=max_dancebility,
+            max_loudness=max_loudness,
+            max_energy=max_energy, 
+            max_valence=max_valence,
+            min_popularity=25
+        )
+        except SpotifyException as e:
+            print('Error occured {e}')
+    else: SpotifyException(msg="Couldn't select genres for the playlist")
 
-    #Get recommended tracks
     try: 
-        data_recomm = sp.recommendations(
-        limit=45,
-        seed_genres=seed_genres,
-        max_dancebility=max_dancebility,
-        max_loudness=max_loudness,
-        max_energy=max_energy, 
-        max_valence=max_valence,
-        min_popularity=25
-    )
+        recommendation_tracks = data_recomm['tracks']
+        print(f'We got {len(recommendation_tracks)} for you')
     except SpotifyException as e:
         print('Error occured {e}')
-        
-    recommendation_tracks = data_recomm['tracks']
-    print(f'We got {len(recommendation_tracks)} for you')
     
     if len(recommendation_tracks) != 0:
         random.shuffle(recommendation_tracks)
