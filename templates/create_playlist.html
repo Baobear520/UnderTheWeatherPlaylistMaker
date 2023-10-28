@@ -5,39 +5,42 @@
 </head>
 <body>
     <h1>We've got a cool playlist for you!</h1>
-    <form id='playlist-form' action="/create-playlist/" method="POST"> 
-        {% csrf_token %}
-        {{form}}
-        <input type="submit" value="Create playlist">
-    </form>
-    <div id="success-message" style="display: none;" >
-        <p>Great! You can find the playlist on your Spotify page. Ready to listen? </p>
-        <a id="spotify-link" href={{spotify_link}}>Listen on Spotify</a>
-    </div>
-
-<script> 
-    document.addEventListener('DOMContentLoaded', function() {
-        const successMessage = document.getElementById('success-message');
-        const playlistForm = document.getElementById('playlist-form');
-        const playlistNameInput = document.getElementById('id_playlist_name');
-        const spotifyLink = document.getElementById('spotify-link'); // Define spotifyLink
-        const url = '{{ spotify_link }}';  // Get the playlist URL from the context
+    
+        <form id='playlist-form' action="/create-playlist/" method="POST"> 
+            {% csrf_token %}
+            {{form}}
+            <input type="submit" value="Create playlist">
+        </form>
         
-        if (playlistForm) {
-        playlistNameInput.value = '';
-        }
-        // Check if the URL is not empty (playlist has been created)
-        if (url) {
-            // Hide the form
-            playlistForm.style.display = 'none';
+        <div id="openweathermap-widget-12"> </div>
+        <script>
+            window.myWidgetParam ? window.myWidgetParam : window.myWidgetParam = [];  
+            window.myWidgetParam.push({
+                id: 12,
+                cityid: '{{city_id}}',
+                appid: '{{api_key}}',
+                units: 'metric',
+                containerid: 'openweathermap-widget-12',});  (function() {
+                    var script = document.createElement('script');
+                    script.async = true;
+                    script.charset = "utf-8";
+                    script.src = "//openweathermap.org/themes/openweathermap/assets/vendor/owm/js/weather-widget-generator.js";
+                    var s = document.getElementsByTagName('script')[0];
+                    s.parentNode.insertBefore(script, s);  
+                })
+            ();
+        </script>
+    <script> 
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const playlistForm = document.getElementById('playlist-form');
+            //Erase the input from the form
+            if (playlistForm) {
+            playlistNameInput.value = '';
+            }
+        });
+    </script>
+    
 
-            // Display the "Great!" message and the Spotify link
-            successMessage.style.display = 'block';
-            spotifyLink.href = url;
-            spotifyLink.style.display = 'block';
-        }
-         
-    });
-</script>
 </body>
 </html>

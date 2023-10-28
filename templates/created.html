@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body/>
+    <p>Great! You can find the playlist on your Spotify page. Ready to listen? </p>
+    <a id="spotify-link" href='{{spotify_link}'>Listen on Spotify</a>
+<script> 
+    document.addEventListener('DOMContentLoaded', function() {
+        const spotifyLink = document.getElementById('spotify-link'); // Define spotifyLink
+        const url = '{{ spotify_link }}';  // Get the playlist URL from the context
+        
+        // Check if the URL is not empty (playlist has been created)
+        if (url) {
+
+            spotifyLink.href = url;
+            spotifyLink.style.display = 'block';
+        }
+        
+    });
+</script>
+</body>
+</html>

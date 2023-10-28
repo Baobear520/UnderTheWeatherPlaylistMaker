@@ -44,10 +44,7 @@ def saved_tracks_genres():
     saved_tracks_popular_genres = [data[0] for data in sorted_genres_by_occurances]
     return saved_tracks_popular_genres
 
-
-
-def generate_playlist():
-
+def get_genres_for_playlist():
     #Getting an array of all available genres
     genres = sp.recommendation_genre_seeds()
     genres = genres['genres']
@@ -78,6 +75,9 @@ def generate_playlist():
     #Combine selected genres
     seed_genres = top_pop_genres + random_seed_genres
     print(f'{seed_genres} been selected for recommendations')
+    return seed_genres
+
+def generate_playlist():
 
     #Define lists of similar weather types
     rainy = ['Thunderstorm','Drizzle','Rain']
@@ -107,6 +107,10 @@ def generate_playlist():
         max_loudness=0.7,
         max_energy=0.7, 
         max_valence=0.6
+
+    seed_genres = get_genres_for_playlist()
+
+    #Get recommended tracks
     try: 
         data_recomm = sp.recommendations(
         limit=45,
@@ -122,6 +126,7 @@ def generate_playlist():
         
     recommendation_tracks = data_recomm['tracks']
     print(f'We got {len(recommendation_tracks)} for you')
+    
     if len(recommendation_tracks) != 0:
         random.shuffle(recommendation_tracks)
         #Search for tracks that have "{WEATHER}" in their names
@@ -139,48 +144,3 @@ def generate_playlist():
         print('Could find a match')
     
     return final_list
-
-"""
-def create_playlist(): 
-    #Get current user's id and name
-    user = sp.me()
-    user_id = user['id']
-    user_name = user['display_name']
-
-    #Check if a playlist with the desired name already exists
-    name = f'{MOOD} Day Mood'
-    my_playlists = sp.current_user_playlists()
-    
-    playlist_names = [playlist['name'] for playlist in my_playlists['items']]
-    if name not in playlist_names:
-        #Create a playlist and grab its id
-        playlist = sp.user_playlist_create(
-            user=user_id,
-            name = 'Rainy Day Mood',
-            description=f"Tracks for {user_name} on a rainy day"
-        )
-        playlist_id = playlist['id']
-        return playlist_id
-    else:
-        raise MyException('Playlist with this name already exists')
-
-def add_tracks():
-
-    #Combine the above logic
-    playlist_id = create_playlist()
-    items = generate_rainy_day_playlist()
-    items_id = [item['id'] for item in items]
-    #Add generated tracks to the new playlist
-    sp.playlist_add_items(
-        playlist_id=playlist_id,
-        items = items_id 
-        )
-    return items
-"""
-
-   
-
-
-    
- 
-

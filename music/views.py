@@ -1,7 +1,7 @@
 import os
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from .playlist_algorithms import generate_playlist
 from .forms import PlaylistForm
 from .weather import city_ID
@@ -16,19 +16,16 @@ sp = spotipy.Spotify(
     )
 
 def login(request):
-    api_key = os.environ.get('OPENWEATHER_API_KEY')
-    city_id = city_ID()
-    return render(
-        request,
-        'practice.html', 
-        context={
-            'api_key': api_key,
-            'city_id': city_id,
-            }
-        )
+    return redirect('home page')
+    
+def home_page(request):
+    return render(request,'home_page.html')
 
 
 def create_playlist(request):
+    #Authorize requests to OpenWeather widget
+    api_key = os.environ.get('OPENWEATHER_API_KEY')
+    city_id = city_ID()
     
     if request.method == 'POST':
         form = PlaylistForm(request.POST)
@@ -49,6 +46,7 @@ def create_playlist(request):
             playlist_id = playlist['id']
             playlist_url = playlist['external_urls']['spotify']
 
+            request.session['spotify_link'] = playlist_url
             #Generate recommended tracks according to the weather and user's taste
             items = generate_playlist()
             items_id = [item['id'] for item in items]
@@ -58,20 +56,31 @@ def create_playlist(request):
                 playlist_id=playlist_id,
                 items = items_id 
             )
+            return redirect('created')
+                  
+        else:
             return render(
                 request, 
                 'create_playlist.html',
                 context={
                     'form': form,
-                    'spotify_link': playlist_url,
+                    'api_key': api_key,
+                    'city_id': city_id,
                 }
             )
-        else:
-            return render(request, 'create_playlist.html',{'form': form})
-
     else:
         form = PlaylistForm()
 
-    return render(request, 'create_playlist.html',{'form': form})
+    return render(
+                request, 
+                'create_playlist.html',
+                context={
+                    'form': form,
+                    'api_key': api_key,
+                    'city_id': city_id,
+                }
+            )
     
-    
+def created(request):
+    spotify_link = request.session.get('spotify_link','#')
+    return render(request,'created.html',{'spotify_link':spotify_link})
