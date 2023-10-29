@@ -16,8 +16,20 @@ def weather_type():
         try:
             observation = mng.weather_at_coords(lat=lat, lon=lon)
             # Grabbing current weather status
-            weather = observation.weather
-            return weather.status
+            weather = observation.weather.status
+            #Define lists of similar weather types
+            rainy = ['Thunderstorm','Drizzle','Rain']
+            cloudy = ['Clouds']
+            sunny = ['Clear']
+            snowy_or_athmosphere = ['Snow','Atmosphere']
+            if weather in rainy:
+                return 'Rainy', weather
+            elif weather in cloudy:
+                return 'Cloudy', weather
+            elif weather in sunny:
+                return 'Sunny', weather
+            elif weather in snowy_or_athmosphere:
+                return 'Snowy/Athmosphere', observation.weather.detailed_status
         except Exception as e:
             print(f'An error occurred while fetching weather data: {e}')
     else:

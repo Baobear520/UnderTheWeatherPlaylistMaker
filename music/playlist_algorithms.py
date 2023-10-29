@@ -5,7 +5,6 @@ from spotipy.oauth2 import SpotifyOAuth
 from .weather import weather_type
 
 
-
 #Autentication
 sp = spotipy.Spotify(
         auth_manager=SpotifyOAuth(
@@ -14,7 +13,7 @@ sp = spotipy.Spotify(
         )
     )
 
-WEATHER = weather_type()
+WEATHER, STATUS = weather_type()
 
 
 def saved_tracks_genres():
@@ -78,14 +77,75 @@ def get_genres_for_playlist():
     return seed_genres
 
 def generate_playlist():
+    # Define criteria for songs that suit the playlist based on weather
+    weather_criteria = {
+        'Rainy': {
+            'max_danceability': 0.3,
+            'max_loudness': 0.5,
+            'max_energy': 0.5,
+            'max_valence': 0.3
+        },
+        'Cloudy': {
+            'max_danceability': 0.6,
+            'max_loudness': 0.7,
+            'max_energy': 0.7,
+            'max_valence': 0.5
+        },
+        'Sunny': {
+            'min_danceability': 0.5,
+            'min_energy': 0.5,
+        },
+        'Snowy/Athmosphere': {
+            'max_danceability': 0.5,
+            'max_loudness': 0.7,
+            'max_energy': 0.7,
+            'max_valence': 0.6
+        }
+    }
 
-    #Define lists of similar weather types
-    rainy = ['Thunderstorm','Drizzle','Rain']
-    cloudy = ['Clouds']
-    sunny = ['Clear']
-    snowy_or_rest = ['Snow','Atmosphere']
+    seed_genres = get_genres_for_playlist()
+    if not seed_genres:
+        raise SpotifyException(msg="Couldn't select genres for the playlist")
 
-    #Define critereas for songs that would suit the playlist
+    # Get recommended tracks based on the chosen genres and weather criteria
+    criteria = weather_criteria.get(WEATHER, {})  # Modify based on actual criteria
+    try:
+        data = sp.recommendations(
+            limit=45,
+            seed_genres=seed_genres,
+            min_popularity=25,
+            **criteria
+        )
+    except SpotifyException as e:
+        print(f'Error occurred: {e}')
+        return None  # Handle this error accordingly
+
+    recommended_tracks = data['tracks']
+    print(f'We got {len(recommended_tracks)} tracks for you')
+
+    if len(recommended_tracks) != 0:
+        random.shuffle(recommended_tracks)
+
+        # Search for tracks that have "{WEATHER}" in their names
+        word_search = sp.search(q=STATUS, type='track', limit=5)
+        word_search_results = word_search['tracks']['items']
+
+        # Combine recommended tracks and tracks from word search
+        final_list = recommended_tracks + word_search_results
+        random.shuffle(final_list)
+
+        print(f"Your current {WEATHER} day playlist:\n")
+        for track in final_list:
+            print(track['name'])
+    else:
+        print("Couldn't find a match")
+
+    return final_list
+
+
+
+
+
 
     if WEATHER in rainy:  
         max_dancebility=0.3,
