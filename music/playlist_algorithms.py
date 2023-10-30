@@ -9,29 +9,22 @@ from .weather import weather_type
 sp = spotipy.Spotify(
         auth_manager=SpotifyOAuth(
             redirect_uri='http://localhost:8080',
-            scope='user-library-read'
+            scope='user-library-read user-top-read playlist-modify-public'
         )
     )
 
-WEATHER, STATUS = weather_type()
+WEATHER, STATUS = weather_type() 
 
-
-def saved_tracks_genres():
+def get_top_genres():
     # Get the user's liked tracks
-    results = sp.current_user_saved_tracks(limit=50)
-
-    popular_genres = {}
-    # Iterate through the results to access the liked track information
-    for item in results['items']:
-        track = item['track']
-        
-        # Use the artist's genres as an approximation of the track's genre
-        artist_id = track['artists'][0]['id']
-        artist_info = sp.artist(artist_id)
-        
-        genres = artist_info['genres']
-
-        for g in genres:
+    top_artists = sp.current_user_top_artists(limit=20, time_range='long_term')
+    genres = []
+    for artist in top_artists['items']:
+        genres.extend(artist['genres'])
+    print(f'You have {len(genres)} favorite genres')
+    #Use a dict to store best genres
+    popular_genres = {}  
+    for g in genres:
             if popular_genres.get(g) is not None:
                 popular_genres[g] = popular_genres[g] + 1
             else:
@@ -40,26 +33,28 @@ def saved_tracks_genres():
         popular_genres.items(),
         key=lambda x:x[1],
         reverse=True)
-    saved_tracks_popular_genres = [data[0] for data in sorted_genres_by_occurances]
-    return saved_tracks_popular_genres
+    popular_genres_names = []
+    for data in sorted_genres_by_occurances:
+        if data[1] > 1:
+            popular_genres_names.append(data[0])
+
+    print(f'Your top genres are {popular_genres_names}')
+    return popular_genres_names
 
 def get_genres_for_playlist():
     #Getting an array of all available genres
-    genres = sp.recommendation_genre_seeds()
-    genres = genres['genres']
+    genres = sp.recommendation_genre_seeds()['genres']
     print(f'total {len(genres)} genres available')
     
-    #Grab 3 most popular genres amongst user's saved tracks
-    pop_genres = saved_tracks_genres()
-    print(f'There are {len(pop_genres)} most popular genres in your library')
+    top_genres = get_top_genres()
 
     #Verify that genres from saved track exist in the list of all the genres
-    for g in pop_genres:
+    for g in top_genres:
         if g not in genres:
-            pop_genres.remove(g)
+            top_genres.remove(g)
             print(f'{g} is not valid genres name. Removed')
 
-    top_pop_genres = pop_genres[:3]
+    top_pop_genres = top_genres[:3]
 
     #Remove the pop genres from the whole genres selection to avoid duplicates 
     for i in top_pop_genres:
@@ -102,23 +97,20 @@ def generate_playlist():
             'max_valence': 0.6
         }
     }
-
     seed_genres = get_genres_for_playlist()
-    if not seed_genres:
-        raise SpotifyException(msg="Couldn't select genres for the playlist")
+    
 
     # Get recommended tracks based on the chosen genres and weather criteria
-    criteria = weather_criteria.get(WEATHER, {})  # Modify based on actual criteria
-    try:
-        data = sp.recommendations(
-            limit=45,
-            seed_genres=seed_genres,
-            min_popularity=25,
-            **criteria
+    criteria = weather_criteria.get(WEATHER,{}) 
+    
+    data = sp.recommendations(
+        limit=45,
+        seed_genres=seed_genres,
+        min_popularity=25,
+        **criteria
         )
-    except SpotifyException as e:
-        print(f'Error occurred: {e}')
-        return None  # Handle this error accordingly
+    if not data: 
+        raise SpotifyException(msg="Coudn't get recommendations data from Spotify ")
 
     recommended_tracks = data['tracks']
     print(f'We got {len(recommended_tracks)} tracks for you')
@@ -133,14 +125,13 @@ def generate_playlist():
         # Combine recommended tracks and tracks from word search
         final_list = recommended_tracks + word_search_results
         random.shuffle(final_list)
-
-        print(f"Your current {WEATHER} day playlist:\n")
-        for track in final_list:
-            print(track['name'])
+        #Grab a list of track ID's
+        items_id = [item['id'] for item in final_list]
+        return items_id
     else:
-        print("Couldn't find a match")
+        raise SpotifyException("Couldn't any tracks that match the criterea")
 
-    return final_list
+    
 
 
 
