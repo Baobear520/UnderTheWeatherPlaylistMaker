@@ -8,16 +8,18 @@ from .forms import PlaylistForm
 from .weather import city_ID
 
 
-#Authorization
-sp = spotipy.Spotify(
+def login(request):
+    #Autentication
+    sp = spotipy.Spotify(
         auth_manager=SpotifyOAuth(
             redirect_uri='http://localhost:8080',
-            scope ='user-library-read user-top-read playlist-modify-public'
+            scope='user-library-read user-top-read playlist-modify-public'
         )
     )
+    # In your login view, after the user is authenticated
+    access_token = sp.auth_manager.get_access_token()
+    request.session['access_token'] = access_token
 
-def login(request):
-    
     return redirect('home page')
     
 def home_page(request):
@@ -25,12 +27,17 @@ def home_page(request):
 
 
 def create_playlist(request):
+    access_token = request.session.get('access_token')
+    if not access_token:
+        return render(request,'error.html')
+    sp = spotipy.Spotify(auth=access_token['access_token'])
+    
     #Authorize requests to OpenWeather widget
     api_key = os.environ.get('OPENWEATHER_API_KEY')
     city_id = city_ID()
    
-    
     if request.method == 'POST':
+        
         form = PlaylistForm(request.POST)
         if form.is_valid():
             playlist_name = form.cleaned_data['playlist_name']
@@ -42,7 +49,7 @@ def create_playlist(request):
             user_name = user['display_name']
 
             #Generate recommended tracks according to the weather and user's taste
-            items_id = generate_playlist()
+            items_id = generate_playlist(sp)
         
             #Create a playlist and grab its id and url
             playlist = sp.user_playlist_create(

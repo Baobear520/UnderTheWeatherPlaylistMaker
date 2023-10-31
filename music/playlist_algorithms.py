@@ -1,17 +1,8 @@
 import random
-import spotipy
-from spotipy.exceptions import SpotifyException
-from spotipy.oauth2 import SpotifyOAuth
 from .weather import weather_type
 
 
-#Autentication
-sp = spotipy.Spotify(
-        auth_manager=SpotifyOAuth(
-            redirect_uri='http://localhost:8080',
-            scope='user-library-read user-top-read playlist-modify-public'
-        )
-    )
+
 
 try: 
     weather, status = weather_type() 
@@ -19,9 +10,7 @@ except TypeError:
     print("Couldn't obtain weather data")
 
 
-
-
-def get_top_genres():
+def get_top_genres(sp):
     # Get the user's liked tracks
     top_artists = sp.current_user_top_artists(limit=20, time_range='long_term')
     genres = []
@@ -47,13 +36,13 @@ def get_top_genres():
             popular_genres_names.append(data[0])
     return popular_genres_names
 
-def get_genres_for_playlist():
+def get_genres_for_playlist(sp):
     #Getting an array of all available genres
     genres = sp.recommendation_genre_seeds()['genres']
     print(f'total {len(genres)} genres available')
     
     #Retrieve a list of top genres
-    top_genres = get_top_genres()
+    top_genres = get_top_genres(sp)
     
     #Verify that genres from top artist exist in the list of all the genres
     for g in top_genres:
@@ -104,7 +93,7 @@ def get_genres_for_playlist():
     print(f"{','.join(seed_genres)} been selected for recommendations")
     return seed_genres
 
-def generate_playlist():
+def generate_playlist(sp):
     # Define criteria for songs that suit the playlist based on weather
     weather_criteria = {
         'Rainy': {
@@ -130,7 +119,7 @@ def generate_playlist():
             'max_valence': 0.6
         }
     }
-    seed_genres = get_genres_for_playlist()
+    seed_genres = get_genres_for_playlist(sp)
     
 
     # Get recommended tracks based on the chosen genres and weather criteria
