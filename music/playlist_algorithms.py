@@ -14,7 +14,7 @@ sp = spotipy.Spotify(
     )
 
 try: 
-    WEATHER, STATUS = weather_type() 
+    weather, status = weather_type() 
 except TypeError:
     print("Couldn't obtain weather data")
 
@@ -134,7 +134,7 @@ def generate_playlist():
     
 
     # Get recommended tracks based on the chosen genres and weather criteria
-    criteria = weather_criteria.get(WEATHER,{}) 
+    criteria = weather_criteria.get(weather,{}) 
     data = sp.recommendations(
         limit=45,
         seed_genres=seed_genres,
@@ -151,7 +151,7 @@ def generate_playlist():
         random.shuffle(recommended_tracks)
 
         # Search for tracks that have "{WEATHER}" in their names
-        word_search = sp.search(q=STATUS, type='track', limit=5)
+        word_search = sp.search(q=status, type='track', limit=5)
         word_search_results = word_search['tracks']['items']
 
         # Combine recommended tracks and tracks from word search

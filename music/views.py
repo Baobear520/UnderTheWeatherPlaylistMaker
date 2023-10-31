@@ -3,7 +3,7 @@ import spotipy
 from spotipy.exceptions import SpotifyException
 from spotipy.oauth2 import SpotifyOAuth,SpotifyOauthError
 from django.shortcuts import redirect, render
-from .playlist_algorithms import generate_playlist, WEATHER
+from .playlist_algorithms import generate_playlist, weather
 from .forms import PlaylistForm
 from .weather import city_ID
 
@@ -34,7 +34,8 @@ def create_playlist(request):
         form = PlaylistForm(request.POST)
         if form.is_valid():
             playlist_name = form.cleaned_data['playlist_name']
-
+            #Passing the playlist name into sessions
+            request.session['playlist_name'] = playlist_name
             #Get current user's id and name
             user = sp.me()
             user_id = user['id']
@@ -47,12 +48,11 @@ def create_playlist(request):
             playlist = sp.user_playlist_create(
                             user=user_id,
                             name = playlist_name,
-                            description=f"Tracks for {user_name} on a {WEATHER} day"
+                            description=f"Tracks for {user_name} on a {weather} day"
                         )
             if not playlist:
                 raise Exception(msg='Error occured while creating a playlist')
             playlist_id = playlist['id']
-            print(playlist_id)
             playlist_url = playlist['external_urls']['spotify']
 
             #Passing the url into sessions
@@ -92,4 +92,12 @@ def create_playlist(request):
     
 def created(request):
     spotify_link = request.session.get('spotify_link','#')
-    return render(request,'created.html',{'spotify_link':spotify_link})
+    playlist_name = request.session.get('playlist_name','')
+    return render(
+        request,
+        'created.html',
+        context = {
+            'spotify_link':spotify_link,
+            'playlist_name':playlist_name
+            }
+        )
