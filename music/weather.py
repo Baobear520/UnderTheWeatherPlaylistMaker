@@ -28,14 +28,13 @@ def weather_type():
                 return 'Cloudy', weather
             elif weather in sunny:
                 return 'Sunny', weather
-            elif weather in snowy_or_athmosphere:
+            else:
                 return 'Snowy/Athmosphere', observation.weather.detailed_status
         except Exception as e:
             print(f'An error occurred while fetching weather data: {e}')
     else:
         print('Location coordinates are unavailable.')
-        return None, None
-
+        return None
 
 def city_ID():
     # Obtaining weather manager object

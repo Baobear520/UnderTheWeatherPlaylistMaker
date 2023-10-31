@@ -13,7 +13,13 @@ sp = spotipy.Spotify(
         )
     )
 
-WEATHER, STATUS = weather_type() 
+try: 
+    WEATHER, STATUS = weather_type() 
+except TypeError:
+    print("Couldn't obtain weather data")
+
+
+
 
 def get_top_genres():
     # Get the user's liked tracks
@@ -29,16 +35,16 @@ def get_top_genres():
                 popular_genres[g] = popular_genres[g] + 1
             else:
                 popular_genres[g] = 1
+    #Get a sorted list of tuples (genre, number of occurences)
     sorted_genres_by_occurances = sorted(
         popular_genres.items(),
         key=lambda x:x[1],
         reverse=True)
+    #Get a sorted list of genres only that occur more than once
     popular_genres_names = []
     for data in sorted_genres_by_occurances:
         if data[1] > 1:
             popular_genres_names.append(data[0])
-
-    print(f'Your top genres are {popular_genres_names}')
     return popular_genres_names
 
 def get_genres_for_playlist():
@@ -46,6 +52,7 @@ def get_genres_for_playlist():
     genres = sp.recommendation_genre_seeds()['genres']
     print(f'total {len(genres)} genres available')
     
+    #Retrieve a list of top genres
     top_genres = get_top_genres()
     
     #Verify that genres from top artist exist in the list of all the genres
@@ -53,9 +60,11 @@ def get_genres_for_playlist():
         if g not in genres:
             top_genres.remove(g)
     
-    number_of_top_genres = len(top_genres)
-    number_of_random_genres = 5
+    #Add randomly chosen genres depending on the existing number of top_genres
+    number_of_top_genres = len(top_genres) #how many genres we got from user's info
+    number_of_random_genres = 5 #max number of genre seeds used in .recommendations 
 
+    #If user has no top artist data we populate all genre seeds randomly 
     if number_of_top_genres == 0:
         random_seed_genres = random.choices(population=genres,k=number_of_random_genres)
     
@@ -63,7 +72,8 @@ def get_genres_for_playlist():
     elif 0 < number_of_top_genres < 3:
         number_of_random_genres = number_of_random_genres - number_of_top_genres
         print(f'We will need {number_of_random_genres} more genres')
-        #Randomly select the rest of the genres
+        #Randomly select the rest of the genres 
+        #The genres must not be in top_genres
         random_seed_genres = []
         while number_of_random_genres != 0:
             genre = random.choice(seq=genres) 
@@ -75,7 +85,10 @@ def get_genres_for_playlist():
             number_of_random_genres -= 1
 
     else:
+        #We decide to choose top-3 from top_genres
         top_genres = top_genres[:3]
+        #Randomly select the rest of the genres 
+        #The genres must not be in top_genres
         number_of_random_genres = 2
         random_seed_genres = []
         while number_of_random_genres != 0:
@@ -122,7 +135,6 @@ def generate_playlist():
 
     # Get recommended tracks based on the chosen genres and weather criteria
     criteria = weather_criteria.get(WEATHER,{}) 
-    
     data = sp.recommendations(
         limit=45,
         seed_genres=seed_genres,
@@ -130,7 +142,7 @@ def generate_playlist():
         **criteria
         )
     if not data: 
-        raise SpotifyException(msg="Coudn't get recommendations data from Spotify ")
+        raise Exception(msg="Coudn't get recommendations data from Spotify ")
 
     recommended_tracks = data['tracks']
     print(f'We got {len(recommended_tracks)} tracks for you')
@@ -149,7 +161,7 @@ def generate_playlist():
         items_id = [item['id'] for item in final_list]
         return items_id
     else:
-        raise SpotifyException("Couldn't any tracks that match the criterea")
+        raise Exception("Couldn't any tracks that match the criterea")
 
     
 

@@ -50,8 +50,9 @@ def create_playlist(request):
                             description=f"Tracks for {user_name} on a {WEATHER} day"
                         )
             if not playlist:
-                raise SpotifyException(msg='Error occured while creating a playlist')
+                raise Exception(msg='Error occured while creating a playlist')
             playlist_id = playlist['id']
+            print(playlist_id)
             playlist_url = playlist['external_urls']['spotify']
 
             #Passing the url into sessions
@@ -63,7 +64,7 @@ def create_playlist(request):
                 items = items_id 
             )
             if not new_playlist:
-                raise SpotifyException(msg="Couldn't add tracks to the playlist")
+                raise Exception(msg="Couldn't add tracks to the playlist")
             return redirect('created')
                   
         else:
