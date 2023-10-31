@@ -47,28 +47,48 @@ def get_genres_for_playlist():
     print(f'total {len(genres)} genres available')
     
     top_genres = get_top_genres()
-
-    #Verify that genres from saved track exist in the list of all the genres
+    
+    #Verify that genres from top artist exist in the list of all the genres
     for g in top_genres:
         if g not in genres:
             top_genres.remove(g)
-            print(f'{g} is not valid genres name. Removed')
-
-    top_pop_genres = top_genres[:3]
-
-    #Remove the pop genres from the whole genres selection to avoid duplicates 
-    for i in top_pop_genres:
-        if i in genres:
-            genres.remove(i)
-            print(f'Removing {i} because it is already chosen')
     
-    #Randomly choose 2 genres but those that are not in the list of most popular 
-    random_seed_genres = random.choices(population=genres,k=2)
-    print(f'Randomly selected genres are {random_seed_genres}')
+    number_of_top_genres = len(top_genres)
+    number_of_random_genres = 5
 
+    if number_of_top_genres == 0:
+        random_seed_genres = random.choices(population=genres,k=number_of_random_genres)
+    
+    #If user only has 1-2 genres that occur more than once
+    elif 0 < number_of_top_genres < 3:
+        number_of_random_genres = number_of_random_genres - number_of_top_genres
+        print(f'We will need {number_of_random_genres} more genres')
+        #Randomly select the rest of the genres
+        random_seed_genres = []
+        while number_of_random_genres != 0:
+            genre = random.choice(seq=genres) 
+            if genre not in top_genres:
+                random_seed_genres.append(genre)
+                print(f'Adding {genre} to the list')
+            else:
+                print(f'{genre} is already in top_genres')
+            number_of_random_genres -= 1
+
+    else:
+        top_genres = top_genres[:3]
+        number_of_random_genres = 2
+        random_seed_genres = []
+        while number_of_random_genres != 0:
+            genre = random.choice(seq=genres) 
+            if genre not in top_genres:
+                random_seed_genres.append(genre)
+            number_of_random_genres -= 1
+
+    print(f"Randomly selected genres are {','.join(random_seed_genres)}")
+    
     #Combine selected genres
-    seed_genres = top_pop_genres + random_seed_genres
-    print(f'{seed_genres} been selected for recommendations')
+    seed_genres = top_genres + random_seed_genres
+    print(f"{','.join(seed_genres)} been selected for recommendations")
     return seed_genres
 
 def generate_playlist():
@@ -138,64 +158,4 @@ def generate_playlist():
 
 
 
-    if WEATHER in rainy:  
-        max_dancebility=0.3,
-        max_loudness=0.5,
-        max_energy=0.5, 
-        max_valence=0.3
-    elif WEATHER in cloudy:
-        max_dancebility=0.5,
-        max_loudness=0.7,
-        max_energy=0.6, 
-        max_valence=0.5
-    elif WEATHER in sunny:
-        max_dancebility=0.99,
-        max_loudness=0.99,
-        max_energy=0.99, 
-        max_valence=0.99
-    elif WEATHER in snowy_or_rest:
-        max_dancebility=0.5,
-        max_loudness=0.7,
-        max_energy=0.7, 
-        max_valence=0.6
-
-    seed_genres = get_genres_for_playlist()
-    if seed_genres:
-        #Get recommended tracks
-        try: 
-            data_recomm = sp.recommendations(
-            limit=45,
-            seed_genres=seed_genres,
-            max_dancebility=max_dancebility,
-            max_loudness=max_loudness,
-            max_energy=max_energy, 
-            max_valence=max_valence,
-            min_popularity=25
-        )
-        except SpotifyException as e:
-            print('Error occured {e}')
-    else: SpotifyException(msg="Couldn't select genres for the playlist")
-
-    try: 
-        recommendation_tracks = data_recomm['tracks']
-        print(f'We got {len(recommendation_tracks)} for you')
-    except SpotifyException as e:
-        print('Error occured {e}')
     
-    if len(recommendation_tracks) != 0:
-        random.shuffle(recommendation_tracks)
-        #Search for tracks that have "{WEATHER}" in their names
-        word_search = sp.search(q=WEATHER, type='track', limit=5)
-        word_search_results = word_search['tracks']['items']
-
-        #Combine recommended tracks and tracks from word search
-        final_list = recommendation_tracks + word_search_results
-        random.shuffle(final_list)
-
-    
-        print(f"Your current {WEATHER} playlist \nchosen from favorite genres ({','.join(genre for genre in seed_genres)}) and songs that have '{WEATHER}' in their names):\n")
-
-    else:
-        print('Could find a match')
-    
-    return final_list

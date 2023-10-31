@@ -34,7 +34,7 @@ def weather_type():
             print(f'An error occurred while fetching weather data: {e}')
     else:
         print('Location coordinates are unavailable.')
-        return None
+        return None, None
 
 
 def city_ID():
