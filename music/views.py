@@ -1,7 +1,9 @@
 import os
-import spotipy
+from spotipy import Spotify
 from spotipy.exceptions import SpotifyException
 from spotipy.oauth2 import SpotifyOAuth,SpotifyOauthError
+from django.http import Http404, HttpResponse, HttpResponseServerError, HttpResponseBadRequest
+from django.template.response import TemplateResponse
 from django.shortcuts import redirect, render
 from .playlist_algorithms import generate_playlist, weather
 from .forms import PlaylistForm
@@ -10,7 +12,7 @@ from .weather import city_ID
 
 def login(request):
     #Autentication
-    sp = spotipy.Spotify(
+    sp = Spotify(
         auth_manager=SpotifyOAuth(
             redirect_uri='http://localhost:8080',
             scope='user-library-read user-top-read playlist-modify-public'
@@ -29,17 +31,17 @@ def home_page(request):
 def create_playlist(request):
     access_token = request.session.get('access_token')
     if not access_token:
-        return render(request,'error.html')
-    sp = spotipy.Spotify(auth=access_token['access_token'])
+        return render(request,'error.html',status=401)
+    sp = Spotify(auth=access_token['access_token'])
     
     #Authorize requests to OpenWeather widget
     api_key = os.environ.get('OPENWEATHER_API_KEY')
     city_id = city_ID()
-   
+
     if request.method == 'POST':
-        
+        #Instatniate a PlaylistForm class with data from user's input
         form = PlaylistForm(request.POST)
-        if form.is_valid():
+        if form.is_valid(): #If user's input is valid, grab the value
             playlist_name = form.cleaned_data['playlist_name']
             #Passing the playlist name into sessions
             request.session['playlist_name'] = playlist_name
@@ -50,15 +52,19 @@ def create_playlist(request):
 
             #Generate recommended tracks according to the weather and user's taste
             items_id = generate_playlist(sp)
-        
+            if not items_id:
+                raise SpotifyException(http_status=500,msg='Error occured',code=404,reason="Coudn't find any tracks matching the criterea")
+            
+            
             #Create a playlist and grab its id and url
             playlist = sp.user_playlist_create(
-                            user=user_id,
+                           user=user_id,
                             name = playlist_name,
                             description=f"Tracks for {user_name} on a {weather} day"
                         )
             if not playlist:
-                raise Exception(msg='Error occured while creating a playlist')
+                return render(request,'error.html',status=500)
+        
             playlist_id = playlist['id']
             playlist_url = playlist['external_urls']['spotify']
 
@@ -71,7 +77,7 @@ def create_playlist(request):
                 items = items_id 
             )
             if not new_playlist:
-                raise Exception(msg="Couldn't add tracks to the playlist")
+                return render(request,'error.html',status=500)
             return redirect('created')
                   
         else:
@@ -99,7 +105,7 @@ def create_playlist(request):
     
 def created(request):
     spotify_link = request.session.get('spotify_link','#')
-    playlist_name = request.session.get('playlist_name','')
+    playlist_name = request.session.get('playlist_name','__')
     return render(
         request,
         'created.html',
