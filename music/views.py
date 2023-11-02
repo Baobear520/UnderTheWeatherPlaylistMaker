@@ -5,6 +5,8 @@ from spotipy.oauth2 import SpotifyOAuth,SpotifyOauthError
 from django.http import Http404, HttpResponse, HttpResponseServerError, HttpResponseBadRequest
 from django.template.response import TemplateResponse
 from django.shortcuts import redirect, render
+from .user_data import get_user_info
+from .create_populate_playlist import *
 from .playlist_algorithms import generate_playlist, weather
 from .forms import PlaylistForm
 from .weather import city_ID
@@ -45,23 +47,17 @@ def create_playlist(request):
             playlist_name = form.cleaned_data['playlist_name']
             #Passing the playlist name into sessions
             request.session['playlist_name'] = playlist_name
-            #Get current user's id and name
-            user = sp.me()
-            user_id = user['id']
-            user_name = user['display_name']
+
+            #Grab user ID and user_name
+            user_id, user_name = get_user_info(sp)
 
             #Generate recommended tracks according to the weather and user's taste
             items_id = generate_playlist(sp)
             if not items_id:
                 raise SpotifyException(http_status=500,msg='Error occured',code=404,reason="Coudn't find any tracks matching the criterea")
             
+            playlist = create_new_playlist(sp,user_id,user_name,playlist_name,weather)
             
-            #Create a playlist and grab its id and url
-            playlist = sp.user_playlist_create(
-                           user=user_id,
-                            name = playlist_name,
-                            description=f"Tracks for {user_name} on a {weather} day"
-                        )
             if not playlist:
                 return render(request,'error.html',status=500)
         
@@ -71,11 +67,7 @@ def create_playlist(request):
             #Passing the url into sessions
             request.session['spotify_link'] = playlist_url
             
-            #Add generated tracks to the new playlist
-            new_playlist = sp.playlist_add_items(
-                playlist_id=playlist_id,
-                items = items_id 
-            )
+            new_playlist = add_tracks_to_playlist(sp,playlist_id,items_id)
             if not new_playlist:
                 return render(request,'error.html',status=500)
             return redirect('created')
