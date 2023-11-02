@@ -4,6 +4,9 @@ from .credentials import ow_credentials
 
 def my_IP_location():
     my_loc = geocoder.ip('me')
-    lat,long = my_loc.latlng
-    return lat,long
+    lat,lon = my_loc.latlng
+    #lat, lon = None, None
+    if lat is None or lon is None:
+        raise ConnectionError('Cannot obtain coordinates')
+    return lat,lon
 

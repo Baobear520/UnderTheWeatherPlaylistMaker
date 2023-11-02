@@ -7,9 +7,9 @@ from django.template.response import TemplateResponse
 from django.shortcuts import redirect, render
 from .user_data import get_user_info
 from .create_populate_playlist import *
-from .playlist_algorithms import generate_playlist, weather
+from .playlist_algorithms import generate_playlist
 from .forms import PlaylistForm
-from .weather import city_ID
+from .weather import city_ID,weather_type
 
 
 def login(request):
@@ -31,15 +31,21 @@ def home_page(request):
 
 
 def create_playlist(request):
+
+    #Authorize requests to OpenWeather widget
+    api_key = os.environ.get('OPENWEATHER_API_KEY')
+    city_id = city_ID()
+
+    #Obtain weather data
+    weather, status = weather_type()
+
+    #Obtain Spotufy access token
     access_token = request.session.get('access_token')
     if not access_token:
         return render(request,'error.html',status=401)
     sp = Spotify(auth=access_token['access_token'])
     
-    #Authorize requests to OpenWeather widget
-    api_key = os.environ.get('OPENWEATHER_API_KEY')
-    city_id = city_ID()
-
+    
     if request.method == 'POST':
         #Instatniate a PlaylistForm class with data from user's input
         form = PlaylistForm(request.POST)
@@ -50,12 +56,15 @@ def create_playlist(request):
 
             #Grab user ID and user_name
             user_id, user_name = get_user_info(sp)
+            if not user_id or not user_name:
+                return render(request,'error.html',status=500)
 
             #Generate recommended tracks according to the weather and user's taste
-            items_id = generate_playlist(sp)
+            items_id = generate_playlist(sp,weather,status)
             if not items_id:
-                raise SpotifyException(http_status=500,msg='Error occured',code=404,reason="Coudn't find any tracks matching the criterea")
+                return render(request,'error.html',status=500)
             
+            #Create a new empty playlist
             playlist = create_new_playlist(sp,user_id,user_name,playlist_name,weather)
             
             if not playlist:
@@ -67,11 +76,13 @@ def create_playlist(request):
             #Passing the url into sessions
             request.session['spotify_link'] = playlist_url
             
+            #Adding generated tracks into the new playlist
             new_playlist = add_tracks_to_playlist(sp,playlist_id,items_id)
             if not new_playlist:
                 return render(request,'error.html',status=500)
+            #If successfully populated, redirect to /create-playlist/success url
             return redirect('created')
-                  
+        
         else:
             return render(
                 request, 
@@ -82,6 +93,7 @@ def create_playlist(request):
                     'city_id': city_id,
                 }
             )
+    #If the form is not valid, render the same page and re-instatniate the form
     else:
         form = PlaylistForm()
 
@@ -96,6 +108,8 @@ def create_playlist(request):
             )
     
 def created(request):
+
+    #Grab these variables to pass into the template
     spotify_link = request.session.get('spotify_link','#')
     playlist_name = request.session.get('playlist_name','__')
     return render(

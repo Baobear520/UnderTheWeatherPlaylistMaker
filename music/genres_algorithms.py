@@ -30,7 +30,7 @@ def sort_top_genres(sp,genres):
 
 def validate_genres_for_playlist(sp,all_genres,pop_genres_names):
     print(f'total {len(all_genres)} genres available')
-    
+    print(f'Pop genres names are {pop_genres_names}')
     #Validate that genres from top artist exist in the list of all the genres
     for g in pop_genres_names:
         if g not in all_genres:
@@ -42,7 +42,6 @@ def validate_genres_for_playlist(sp,all_genres,pop_genres_names):
 def add_random_genres(sp,all_genres,top_genres):
 
     number_of_top_genres = len(top_genres) #how many genres we got from user's info
-    print(number_of_top_genres)
     number_of_random_genres = 5 #max number of genre seeds used in .recommendations 
 
     #If user has no top artist data we populate all genre seeds randomly 

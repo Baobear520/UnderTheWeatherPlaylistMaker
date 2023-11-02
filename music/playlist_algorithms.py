@@ -2,13 +2,7 @@ from .genres_algorithms import *
 from .user_data import get_top_genres_from_artists
 from .weather import weather_type
 
-
-try: 
-    weather, status = weather_type() 
-except TypeError:
-    print("Couldn't obtain weather data")
-
-
+  
 def define_criterea(sp,weather):
     
     # Define criteria for songs that suit the playlist based on weather
@@ -41,7 +35,7 @@ def define_criterea(sp,weather):
     return criteria 
 
 
-def get_recommended_tracks(sp):
+def get_recommended_tracks(sp,weather):
 
     all_genres = get_all_genres(sp)
     genres = get_top_genres_from_artists(sp)
@@ -61,13 +55,12 @@ def get_recommended_tracks(sp):
 
     recommended_tracks = data['tracks']
     print(f'We got {len(recommended_tracks)} tracks for you')
-
     if len(recommended_tracks) != 0:
         random.shuffle(recommended_tracks)
 
     return recommended_tracks
         
-def get_word_search_tracks(sp):       
+def get_word_search_tracks(sp,status):       
         
     # Search for tracks that have "{status}" in their names
 
@@ -76,9 +69,9 @@ def get_word_search_tracks(sp):
     return word_search_tracks
 
 
-def generate_playlist(sp):
-    recommended_tracks = get_recommended_tracks(sp)
-    word_search_tracks = get_word_search_tracks(sp)
+def generate_playlist(sp,weather,status):
+    recommended_tracks = get_recommended_tracks(sp,weather)
+    word_search_tracks = get_word_search_tracks(sp,status)
 
     # Combine recommended tracks and tracks from word search
     final_list = recommended_tracks + word_search_tracks
