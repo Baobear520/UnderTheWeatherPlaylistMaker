@@ -1,5 +1,7 @@
+import logging
 from spotipy.exceptions import SpotifyException
 
+logger = logging.getLogger(__name__)
 
 def get_user_info(sp):
     #Get current user's id and name
@@ -11,6 +13,15 @@ def get_user_info(sp):
     except Exception as e:
         print('Whoopsies')
         return None, None
+
+
+
+#Get a list of all user's playlists
+def get_all_playlists_names(sp):
+    all_playlists = sp.current_user_playlists()['items']
+    all_playlists_names = [playlist['name'] for playlist in all_playlists]
+    return all_playlists_names
+
 
 #Get a list of most popular genres from user's top artists list
 def get_top_genres_from_artists(sp):

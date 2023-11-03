@@ -1,12 +1,15 @@
 import geocoder
-import os
+import os, logging
 from .credentials import ow_credentials
 
+logger = logging.getLogger(__name__)
+
+
 def my_IP_location():
+
     my_loc = geocoder.ip('me')
+    logger.info('Obtained {my_loc} object')
     lat,lon = my_loc.latlng
-    #lat, lon = None, None
-    if lat is None or lon is None:
-        raise ConnectionError('Cannot obtain coordinates')
+    logger.info('Lat is {lat}, lon is {lon}')
     return lat,lon
 

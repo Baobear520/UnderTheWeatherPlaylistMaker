@@ -1,4 +1,6 @@
-import random
+import random, logging
+
+logger = logging.getLogger(__name__)
 
 def get_all_genres(sp):
     #Getting an array of all available genres

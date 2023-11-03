@@ -9,9 +9,9 @@
         <form id='playlist-form' action="/create-playlist/" method="POST"> 
             {% csrf_token %}
             {{form}}
+            {{form.error}}
             <input type="submit" value="Create playlist">
         </form>
-        
         <div id="openweathermap-widget-12"> </div>
         <script>
             window.myWidgetParam ? window.myWidgetParam : window.myWidgetParam = [];  

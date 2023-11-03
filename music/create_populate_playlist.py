@@ -1,3 +1,6 @@
+import logging
+
+logger = logging.getLogger(__name__)
 
 def create_new_playlist(sp,user_id,user_name,playlist_name,weather):
 #Create a playlist and grab its id and url

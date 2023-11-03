@@ -1,8 +1,10 @@
+import logging
 from .genres_algorithms import *
 from .user_data import get_top_genres_from_artists
-from .weather import weather_type
 
   
+logger = logging.getLogger(__name__)
+
 def define_criterea(sp,weather):
     
     # Define criteria for songs that suit the playlist based on weather

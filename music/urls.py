@@ -1,6 +1,8 @@
+import logging
 from django.urls import path
 from . import views 
 
+logger = logging.getLogger(__name__)
 
 urlpatterns = [
     path('', view=views.login,name='login'),
