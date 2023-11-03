@@ -60,7 +60,6 @@ def create_playlist(request):
         #Instatniate a PlaylistForm class with data from user's input
         form = PlaylistForm(request.POST,sp=sp)
         if form.is_valid(): #If user's input is valid, grab the value
-            
             playlist_name = form.cleaned_data['playlist_name']
         
             #Passing the playlist name into sessions
@@ -87,7 +86,8 @@ def create_playlist(request):
                 return render(request,'error.html',status=500)
             #If successfully populated, redirect to /create-playlist/success url
             return redirect('created')
-        #If the form is not valid, render the same page 
+        
+        #If the form is not valid, render the same page with error message from the form
         else:
             return render(
                 request, 
@@ -98,6 +98,7 @@ def create_playlist(request):
                     'city_id': city_id,
                 }
             )
+    #If http method is not POST:
     else:
         form = PlaylistForm()
         return render(
