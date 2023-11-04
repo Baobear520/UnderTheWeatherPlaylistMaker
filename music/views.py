@@ -20,16 +20,22 @@ logger = logging.getLogger(__name__)
 
 def login(request):
     #Autentication
-    sp = Spotify(
-        auth_manager=SpotifyOAuth(
-            redirect_uri='http://localhost:8080',
-            scope='user-library-read user-top-read playlist-modify-public'
+    try:
+        sp = Spotify(
+            auth_manager=SpotifyOAuth(
+                redirect_uri='http://localhost:8080',
+                scope='user-library-read user-top-read playlist-modify-public'
+            )
         )
-    )
-    # In your login view, after the user is authenticated
-    access_token = sp.auth_manager.get_access_token()
-    request.session['access_token'] = access_token
-    return redirect('home page')
+        logger.info('Spotify user has been authenticated')
+        # In your login view, after the user is authenticated
+        access_token = sp.auth_manager.get_access_token()
+        request.session['access_token'] = access_token
+        return redirect('home page')
+    except SpotifyOauthError as e:
+        # Handle the exception, you can log it and provide a user-friendly error message
+        logger.error('Spotify authentication failed: %s' % e)
+        return render(request, 'error.html', {'error_message': 'Spotify authentication failed'})
 
     
 def home_page(request):
@@ -40,6 +46,7 @@ def create_playlist(request):
 
     #Authorize requests to OpenWeather widget
     api_key = os.environ.get('OPENWEATHER_API_KEY')
+    #et the OpenWeather manager object
     mng = ow_credentials(api_key)
 
     #Obtain coordinates for the weather API
