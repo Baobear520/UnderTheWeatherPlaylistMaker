@@ -1,43 +1,70 @@
 import random, logging
+from spotipy.exceptions import SpotifyException
+
 
 logger = logging.getLogger(__name__)
 
+
 def get_all_genres(sp):
     #Getting an array of all available genres
-    all_genres = sp.recommendation_genre_seeds()['genres']
-    return all_genres
-
+    try:
+        all_genres = sp.recommendation_genre_seeds()['genres']
+        logger.info(f"Obtained available genres from Spotify")
+        return all_genres
+    except SpotifyException(reason="Couldn't obtain available genres from Spotify.") as e:
+        logger.error(f"Couldn't obtain available genres from Spotify. Try reloading the page: {e}")
+        return None
+    except Exception as e:
+        logger.info(f"An unexpected error occurred: {e}")
+        return None
+    
 
 #Get a sorted list of the most popular genres (occur more than once)
-def sort_top_genres(sp,genres):
-    popular_genres = {}  
-    for g in genres:
-            if popular_genres.get(g) is not None:
-                popular_genres[g] = popular_genres[g] + 1
+def sort_top_genres(sp, genres):
+    try:
+        popular_genres = {}
+        #Loop through the list of all genres and add the key and value into the dict
+        for g in genres:
+            if g in popular_genres:
+                popular_genres[g] += 1
             else:
                 popular_genres[g] = 1
 
-    #Get a sorted list of tuples (genre, number of occurences)
-    sorted_genres_by_occurances = sorted(
-        popular_genres.items(),
-        key=lambda x:x[1],
-        reverse=True)
-    
-    #Get a sorted list of genres only that occur more than once
-    popular_genres_names = []
-    for data in sorted_genres_by_occurances:
-        if data[1] > 1:
-            popular_genres_names.append(data[0])
-    return popular_genres_names
+        logger.info("Obtained a sorted list of tuples (genre, number of occurrences)")
+
+        # Get a sorted list of tuples (genre, number of occurrences)
+        sorted_genres_by_occurrences = sorted(
+            popular_genres.items(),
+            key=lambda x: x[1],
+            reverse=True
+        )
+        # Get a sorted list of genres that occur more than once
+        popular_genres_names = [data[0] for data in sorted_genres_by_occurrences if data[1] > 1]
+        return popular_genres_names
+    except ValueError as e:
+        logger.error(f"No available genres to sort: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"An unexpected error occurred: {e}")
+        return None
+
 
 def validate_genres_for_playlist(sp,all_genres,pop_genres_names):
-    print(f'total {len(all_genres)} genres available')
-    print(f'Pop genres names are {pop_genres_names}')
+
+    logger.info(f"Most popular genres are {pop_genres_names}")
     #Validate that genres from top artist exist in the list of all the genres
-    for g in pop_genres_names:
-        if g not in all_genres:
-            pop_genres_names.remove(g)
-    return pop_genres_names
+    try:
+        for g in pop_genres_names:
+            if g not in all_genres:
+                pop_genres_names.remove(g)
+        logger.info(f"Obtained a list of validated most popular genres")
+        return pop_genres_names
+    except ValueError as e:
+        logger.error(f"No data in most popular genres : {e}")
+        return None
+    except Exception as e:
+        logger.error(f"An unexpected error occurred: {e}")
+        return None
 
 
 #Select randomly chosen genres depending on the existing number of top_genres

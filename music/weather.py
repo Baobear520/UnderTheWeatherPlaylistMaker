@@ -1,7 +1,6 @@
 import logging
 from pyowm.commons import exceptions as ow_exceptions
-from .credentials import ow_credentials
-from .location import my_IP_location
+
 
 logger = logging.getLogger(__name__)
 
@@ -10,8 +9,9 @@ def weather_type(mng, lat, lon):
     try:
         observation = mng.weather_at_coords(lat=lat, lon=lon)
         weather = observation.weather.status
-        detailed_weather = observation.weather.detailed_status
+        detailed_status = observation.weather.detailed_status
 
+        logging.info(f"Current weather - {weather}, detailed status  - {detailed_status}")
         #Creating a dictionary of 'condition': conditions_list  like objects
         weather_conditions = {
             'Rainy': ['Thunderstorm', 'Drizzle', 'Rain'],
@@ -23,7 +23,7 @@ def weather_type(mng, lat, lon):
         for condition, conditions_list in weather_conditions.items():
             if weather in conditions_list:
                 if condition == 'Snowy/Athmosphere':
-                    return condition,  detailed_weather
+                    return condition,  detailed_status
                 return condition, weather
 
         # If none of the predefined conditions matched
