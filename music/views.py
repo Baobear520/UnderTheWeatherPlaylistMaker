@@ -1,13 +1,11 @@
 import os, logging
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth,SpotifyOauthError
-from django.http import Http404, HttpResponse, HttpResponseServerError, HttpResponseBadRequest
-from django.template.response import TemplateResponse
+from pyowm.commons import exceptions as ow_exceptions
 from django.shortcuts import redirect, render
-from django.forms import ValidationError
 from music.scripts.credentials import ow_credentials
 from .scripts.location import my_IP_location
-from .scripts.user_data import get_user_info,get_all_playlists_names
+from .scripts.user_data import get_user_info
 from .scripts.create_populate_playlist import *
 from .scripts.playlist_algorithms import generate_playlist
 from .forms import PlaylistForm
@@ -33,7 +31,7 @@ def login(request):
         return redirect('home page')
     except SpotifyOauthError as e:
         # Handle the exception, you can log it and provide a user-friendly error message
-        logger.error('Spotify authentication failed: %s' % e)
+        logger.error(f"Spotify authentication failed: {e}")
         return render(request, 'error.html', {'error_message': 'Spotify authentication failed'})
 
     
@@ -44,70 +42,62 @@ def home_page(request):
 def create_playlist(request):
 
     #Authorize requests to OpenWeather widget
-    api_key = os.environ.get('OPENWEATHER_API_KEY')
-    #et the OpenWeather manager object
-    mng = ow_credentials(api_key)
+    try:
+        api_key = os.environ.get('OPENWEATHER_API_KEY')
+        #Get the OpenWeather manager object
+        mng = ow_credentials(api_key)
 
-    #Obtain coordinates for the weather API
-    lat, lon = my_IP_location()
+        #Obtain coordinates for the weather API
+        lat, lon = my_IP_location()
 
-    #Obtain weather data for the widget and further use
-    weather, status = weather_type(mng,lat,lon)
-    city_id = city_ID(mng,lat,lon)
+        #Obtain weather data for the widget and further use
+        weather, status = weather_type(mng,lat,lon)
+        city_id = city_ID(mng,lat,lon)
 
-    #Obtain Spotify access token
-    access_token = request.session.get('access_token')
-    if not access_token:
-        return render(request,'error.html',status=401)
-    sp = Spotify(auth=access_token['access_token'])
-    
-    
-    if request.method == 'POST':
-        #Instatniate a PlaylistForm class with data from user's input
-        form = PlaylistForm(request.POST,sp=sp)
-        if form.is_valid(): #If user's input is valid, grab the value
-            playlist_name = form.cleaned_data['playlist_name']
+        #Obtain Spotify access token
+        access_token = request.session.get('access_token')
+        if not access_token:
+            return render(request,'error.html',status=401)
+        #Pass the access token
+        sp = Spotify(auth=access_token['access_token'])
         
-            #Passing the playlist name into sessions
-            request.session['playlist_name'] = playlist_name
-
-            #Grab user ID and user_name
-            user_id, user_name = get_user_info(sp)
-
-            #Generate recommended tracks according to the weather and user's taste
-            items_id = generate_playlist(sp,weather,status)
+        if request.method == 'POST':
+            #Instantiate a PlaylistForm class with data from user's input
+            form = PlaylistForm(request.POST,sp=sp)
+            if form.is_valid(): #If user's input is valid, grab the value
+                playlist_name = form.cleaned_data['playlist_name']
             
-            #Create a new empty playlist
-            playlist = create_new_playlist(sp,user_id,user_name,playlist_name,weather)
-            
-            playlist_id = playlist['id']
-            playlist_url = playlist['external_urls']['spotify']
+                #Passing the playlist name into sessions
+                request.session['playlist_name'] = playlist_name
 
-            #Passing the url into sessions
-            request.session['spotify_link'] = playlist_url
+                #Grab user ID and user_name
+                user_id, user_name = get_user_info(sp)
+    
+
+                #Generate recommended tracks according to the weather and user's taste
+                items_id = generate_playlist(sp,weather,status)
+               
+                if items_id == []:
+                    return render(request, 'error.html', {"error_message": "Couldn't find any tracks for you."}, status=404)
+
+                #Create a new empty playlist
+                playlist = create_new_playlist(sp,user_id,user_name,playlist_name,weather)
+                
+                playlist_id = playlist['id']
+                playlist_url = playlist['external_urls']['spotify']
+
+                #Passing the url into sessions
+                request.session['spotify_link'] = playlist_url
+                
+                #Adding generated tracks into the new playlist
+                add_tracks_to_playlist(sp,playlist_id,items_id)
+                
+                #If successfully populated, redirect to /create-playlist/success url
+                return redirect('created')
             
-            #Adding generated tracks into the new playlist
-            new_playlist = add_tracks_to_playlist(sp,playlist_id,items_id)
-            if not new_playlist:
-                return render(request,'error.html',status=500)
-            #If successfully populated, redirect to /create-playlist/success url
-            return redirect('created')
-        
-        #If the form is not valid, render the same page with error message from the form
-        else:
-            return render(
-                request, 
-                'create_playlist.html',
-                context={
-                    'form': form,
-                    'api_key': api_key,
-                    'city_id': city_id,
-                }
-            )
-    #If http method is not POST:
-    else:
-        form = PlaylistForm()
-        return render(
+            #If the form is not valid, render the same page with error message from the form
+            else:
+                return render(
                     request, 
                     'create_playlist.html',
                     context={
@@ -116,7 +106,31 @@ def create_playlist(request):
                         'city_id': city_id,
                     }
                 )
-    
+        #If http method is not POST:
+        else:
+            form = PlaylistForm()
+            return render(
+                        request, 
+                        'create_playlist.html',
+                        context={
+                            'form': form,
+                            'api_key': api_key,
+                            'city_id': city_id,
+                        }
+                    )
+    except SpotifyException as e:
+        logger.error(f"Spotify authorization failed: {e}")
+        return render(request, 'error.html', {'error_message': 'Spotify authorization failed. Please log in again.'}, status=401)
+
+    except ow_exceptions.PyOWMError as e:
+        logger.error(f"Weather data retrieval failed: {e}")
+        return render(request, 'error.html', {'error_message': 'Weather data retrieval failed. Please try again later.'}, status=500)
+
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+        return render(request, 'error.html', {'error_message': 'An unexpected error occurred. Please try again later.'}, status=500)
+
+
 def created(request):
 
     #Grab these variables to pass into the template
