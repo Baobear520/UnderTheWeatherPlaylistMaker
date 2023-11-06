@@ -5,6 +5,7 @@ from .user_data import get_top_genres_from_artists
   
 logger = logging.getLogger(__name__)
 
+
 def define_criterea(sp,weather):
     
     # Define criteria for songs that suit the playlist based on weather
@@ -33,55 +34,76 @@ def define_criterea(sp,weather):
         }
     }
     # Get recommended tracks based on the chosen genres and weather criteria
-    criteria = weather_criteria.get(weather,{})
-    return criteria 
+    try:
+        criteria = weather_criteria.get(weather,{})
+        return criteria 
+    except Exception as e:
+        logger.error(f"An unexpected error occurred: {e}")
+        return {}
 
 
 def get_recommended_tracks(sp,weather):
+    try:
+        #Obtain data for track recommendation search
+        all_genres = get_all_genres(sp)
+        genres = get_top_genres_from_artists(sp)
+        pop_genres_names = sort_top_genres(sp,genres)
+        top_genres = validate_genres_for_playlist(sp,all_genres,pop_genres_names)
+        random_seed_genres = add_random_genres(sp,all_genres,top_genres)
+        seed_genres = combined_genres(sp,top_genres,random_seed_genres)
+        criterea = define_criterea(sp,weather)
 
-    all_genres = get_all_genres(sp)
-    genres = get_top_genres_from_artists(sp)
-    pop_genres_names = sort_top_genres(sp,genres)
-    top_genres = validate_genres_for_playlist(sp,all_genres,pop_genres_names)
-    random_seed_genres = add_random_genres(sp,all_genres,top_genres)
-    seed_genres = combined_genres(sp,top_genres,random_seed_genres)
-    criterea = define_criterea(sp,weather)
+        #Search for track recommendations on Spotify
+        data = sp.recommendations(
+            **criterea,
+            limit=45,
+            seed_genres=seed_genres,
+            min_popularity=25,
+            )
 
-    
-    data = sp.recommendations(
-        **criterea,
-        limit=45,
-        seed_genres=seed_genres,
-        min_popularity=25,
-        )
+        recommended_tracks = data['tracks']
+        logger.info(f'We got {len(recommended_tracks)} tracks for you based on weather criterea')
+        return recommended_tracks
+    except SpotifyException(reason="Couldn't obtain data from track recommendation search") as e:
+        logger.error(f"Couldn't obtain data from track recommendation search. Try reloading the page: {e}")
+        return []
+    except Exception as e:
+        logger.error(f"An unexpected error occurred: {e}")
+        return []
 
-    recommended_tracks = data['tracks']
-    print(f'We got {len(recommended_tracks)} tracks for you')
-    if len(recommended_tracks) != 0:
-        random.shuffle(recommended_tracks)
 
-    return recommended_tracks
-        
 def get_word_search_tracks(sp,status):       
         
     # Search for tracks that have "{status}" in their names
-
-    word_search = sp.search(q=status, type='track', limit=5)
-    word_search_tracks = word_search['tracks']['items']
-    return word_search_tracks
+    try:
+        word_search = sp.search(q=status, type='track', limit=5)
+        word_search_tracks = word_search['tracks']['items']
+        logger.info(f'We got {len(word_search_tracks)} tracks that contain the word {status}')
+        return word_search_tracks
+    except SpotifyException(reason="Couldn't obtain data from the word {status} track search") as e:
+        logger.error(f"Couldn't obtain data from the word {status} track search. Try reloading the page: {e}")
+        return []
+    except Exception as e:
+        logger.error(f"An unexpected error occurred: {e}")
+        return []
 
 
 def generate_playlist(sp,weather,status):
-    recommended_tracks = get_recommended_tracks(sp,weather)
-    word_search_tracks = get_word_search_tracks(sp,status)
+    try:
+        recommended_tracks = get_recommended_tracks(sp,weather)
+        word_search_tracks = get_word_search_tracks(sp,status)
 
-    # Combine recommended tracks and tracks from word search
-    final_list = recommended_tracks + word_search_tracks
-    random.shuffle(final_list)
-
-    #Grab a list of track ID's
-    items_id = [item['id'] for item in final_list]
-    return items_id
+        # Combine recommended tracks and tracks from word search
+        final_list = recommended_tracks + word_search_tracks
+        if len(final_list) > 1:
+            random.shuffle(final_list)
+            
+        #Grab a list of track ID's
+        items_id = [item['id'] for item in final_list]
+        return items_id
+    except Exception as e:
+        logger.error(f"An unexpected error occurred: {e}")
+        return []
     
    
 

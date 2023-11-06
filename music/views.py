@@ -1,6 +1,5 @@
 import os, logging
 from spotipy import Spotify
-from spotipy.exceptions import SpotifyException
 from spotipy.oauth2 import SpotifyOAuth,SpotifyOauthError
 from django.http import Http404, HttpResponse, HttpResponseServerError, HttpResponseBadRequest
 from django.template.response import TemplateResponse

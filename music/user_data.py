@@ -30,10 +30,10 @@ def get_all_playlists_names(sp):
         return all_playlists_names
     except SpotifyException(reason="Couldn't obtain user's playlists") as e:
         logger.error(f"Couldn't obtain user's playlists. Try reloading the page again: {e}")
-        return None
+        return []
     except Exception as e:
         logger.info(f"An unexpected error occurred: {e}")
-        return None
+        return []
 
 #Get a list of most popular genres from user's top artists list
 def get_top_genres_from_artists(sp):
@@ -48,8 +48,8 @@ def get_top_genres_from_artists(sp):
         return genres
     except SpotifyException(reason="Couldn't obtain user's top artists data") as e:
         logger.error(f"Couldn't obtain user's top artists data. Try reloading the page again: {e}")
-        return None
+        return []
     except Exception as e:
         logger.info(f"An unexpected error occurred: {e}")
-        return None
+        return []
          
