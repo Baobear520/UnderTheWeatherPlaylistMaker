@@ -1,5 +1,5 @@
 from django import forms
-from .user_data import get_all_playlists_names
+from .scripts.user_data import get_all_playlists_names
 class PlaylistForm(forms.Form):
     playlist_name = forms.CharField(
         max_length=64, 

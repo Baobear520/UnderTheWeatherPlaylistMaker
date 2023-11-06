@@ -5,13 +5,13 @@ from django.http import Http404, HttpResponse, HttpResponseServerError, HttpResp
 from django.template.response import TemplateResponse
 from django.shortcuts import redirect, render
 from django.forms import ValidationError
-from music.credentials import ow_credentials
-from .location import my_IP_location
-from .user_data import get_user_info,get_all_playlists_names
-from .create_populate_playlist import *
-from .playlist_algorithms import generate_playlist
+from music.scripts.credentials import ow_credentials
+from .scripts.location import my_IP_location
+from .scripts.user_data import get_user_info,get_all_playlists_names
+from .scripts.create_populate_playlist import *
+from .scripts.playlist_algorithms import generate_playlist
 from .forms import PlaylistForm
-from .weather import city_ID,weather_type
+from .scripts.weather import city_ID,weather_type
 
 
 logger = logging.getLogger(__name__)
