@@ -11,7 +11,7 @@ def ow_credentials(api_key):
         owm = OWM(api_key)
         #Obtain the manager object
         mng = owm.weather_manager()
-        logger.info('OpenWeather manager object has been obtained')
+        logger.info('OpenWeather manager object {mng} has been obtained')
         return mng
     except exceptions.UnauthorizedError as e:
         logger.error(f"Coudn't get access to OpenWeather. Please check your internet connection or your api_key validity: {e}")
