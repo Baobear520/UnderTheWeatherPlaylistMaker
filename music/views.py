@@ -72,7 +72,8 @@ def create_playlist(request):
 
                 #Grab user ID and user_name
                 user_id, user_name = get_user_info(sp)
-    
+                if not user_id and not user_name:
+                    return render(request, 'error.html', {"error_message": "Couldn't get access to your profile information."}, status=404)
 
                 #Generate recommended tracks according to the weather and user's taste
                 items_id = generate_playlist(sp,weather,status)
@@ -82,6 +83,8 @@ def create_playlist(request):
 
                 #Create a new empty playlist
                 playlist = create_new_playlist(sp,user_id,user_name,playlist_name,weather)
+                if not playlist:
+                    return render(request, 'error.html', {"error_message": "Couldn't create a new playlist."}, status=404)
                 
                 playlist_id = playlist['id']
                 playlist_url = playlist['external_urls']['spotify']
@@ -90,8 +93,9 @@ def create_playlist(request):
                 request.session['spotify_link'] = playlist_url
                 
                 #Adding generated tracks into the new playlist
-                add_tracks_to_playlist(sp,playlist_id,items_id)
-                
+                new_playlist = add_tracks_to_playlist(sp,playlist_id,items_id)
+                if not new_playlist:
+                    return render(request, 'error.html', {"error_message": "Couldn't add tracks to {playlist_name} playlist."}, status=404)
                 #If successfully populated, redirect to /create-playlist/success url
                 return redirect('created')
             
