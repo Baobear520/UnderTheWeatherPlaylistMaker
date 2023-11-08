@@ -32,15 +32,14 @@ def weather_type(mng, lat, lon):
             'Rainy': ['Thunderstorm', 'Drizzle', 'Rain'],
             'Cloudy': ['Clouds'],
             'Sunny': ['Clear'],
-            'Snowy/Athmosphere': ['Snow', 'Atmosphere']
+            'Snowy/Atmosphere': ['Snow', 'Atmosphere']
         }
 
         for condition, conditions_list in weather_conditions.items():
             if weather in conditions_list:
-                if condition == 'Snowy/Athmosphere':
+                if condition == 'Snowy/Atmosphere':
                     return condition,  detailed_status
                 return condition, weather
-
         # If none of the predefined conditions matched
         return 'Unknown', weather
 
