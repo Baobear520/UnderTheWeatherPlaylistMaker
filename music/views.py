@@ -1,15 +1,15 @@
-import os, logging
+import logging
+from django.shortcuts import redirect, render
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth,SpotifyOauthError
 from pyowm.commons import exceptions as ow_exceptions
-from django.shortcuts import redirect, render
-from music.scripts.credentials import ow_credentials
+from config.credentials import OWM_API_KEY
 from .scripts.location import my_IP_location
 from .scripts.user_data import get_user_info
 from .scripts.create_populate_playlist import *
 from .scripts.playlist_algorithms import generate_playlist
+from .scripts.weather import city_ID,weather_type,get_owm_mng
 from .forms import PlaylistForm
-from .scripts.weather import city_ID,weather_type
 
 
 logger = logging.getLogger(__name__)
@@ -43,13 +43,10 @@ def create_playlist(request):
 
     #Authorize requests to OpenWeather widget
     try:
-        api_key = os.environ.get('OPENWEATHER_API_KEY')
-        #Get the OpenWeather manager object
-        mng = ow_credentials(api_key)
-
+        api_key = OWM_API_KEY
         #Obtain coordinates for the weather API
         lat, lon = my_IP_location()
-
+        mng = get_owm_mng(api_key)
         #Obtain weather data for the widget and further use
         weather, status = weather_type(mng,lat,lon)
         city_id = city_ID(mng,lat,lon)

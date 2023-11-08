@@ -161,3 +161,5 @@ cython_debug/
 
 
 get_track_features.py
+credentials.py
+

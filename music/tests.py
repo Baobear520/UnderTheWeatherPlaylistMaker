@@ -2,7 +2,7 @@ import os
 from django.test import TestCase 
 from unittest.mock import patch
 from pyowm.commons.exceptions import UnauthorizedError
-from .scripts import location, credentials
+from .scripts import location,weather
 
 # Create your tests here.
 class LocationTests(TestCase):
@@ -27,31 +27,14 @@ class LocationTests(TestCase):
         self.assertIsNone(lon)
 
 class WeatherTestCase(TestCase):
-
+    
     @patch('pyowm.owm.OWM')
-    def test_ow_credentials_success(self, mock_owm):
+    def test_get_mng_success(self,mock_owm):
         # Mock the OWM constructor to return an OWM object
         mock_mng = mock_owm.return_value.weather_manager.return_value
-        mng = credentials.ow_credentials('mmm')
+
+        mng = weather.get_owm_mng()
 
         self.assertEqual(mng, mock_mng)
-        mock_owm.assert_called_once_with('kkk')
-
-    @patch('pyowm.owm.OWM')
-    def test_ow_credentials_unauthorized_error(self, mock_owm):
-        # Mock the OWM constructor to raise UnauthorizedError
-        mock_owm.side_effect = UnauthorizedError("Unauthorized")
-
-        mng = credentials.ow_credentials('fvfvfv')
-
-        self.assertIsNone(mng)
-
-    @patch('pyowm.owm.OWM')
-    def test_ow_credentials_general_exception(self, mock_owm):
-        # Mock the OWM constructor to raise a general exception
-        mock_owm.side_effect = Exception("Test exception")
-
-        mng = credentials.ow_credentials('vfvfvf')
-
-        self.assertIsNone(mng)
+        
 

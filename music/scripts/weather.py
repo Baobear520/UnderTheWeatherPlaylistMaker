@@ -1,9 +1,24 @@
 import logging
+from pyowm.owm import OWM
 from pyowm.commons import exceptions as ow_exceptions
 
 
 logger = logging.getLogger(__name__)
 
+
+def get_owm_mng(api_key):
+    try:
+        owm = OWM(api_key)
+        #Obtain the manager object
+        mng = owm.weather_manager()
+        logger.info(f'OpenWeather manager object {mng} has been obtained')
+        return mng
+    except ow_exceptions.UnauthorizedError as e:
+        logger.error(f"Coudn't get access to OpenWeather. Please check your internet connection or your api_key validity: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"An unexpected error occurred: {e}")
+        return None
 
 def weather_type(mng, lat, lon):
     try:
