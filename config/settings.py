@@ -155,7 +155,7 @@ LOGGING = {
             'level': os.environ.get('DJANG0_LOG_LEVEL','INFO'),
         },
         'music': {
-            'handlers':['console'],
+            'handlers':['console','file'],
             'level': 'ERROR',
             'propagate': False,
         }

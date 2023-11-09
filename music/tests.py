@@ -88,8 +88,9 @@ class WeatherStatusTestCase(TestCase):
         observation = Mock()
         mock_owm_mng.weather_at_coords.return_value = observation
         observation.weather.status = 'Snow'
-        condition = weather_type(mock_owm_mng, *self.coordinates)[0]
+        condition, weather = weather_type(mock_owm_mng, *self.coordinates)
         self.assertEqual(condition, 'Snowy/Atmosphere')
+        self.assertIsNotNone(weather.detailed_status)
 
     @patch('music.scripts.weather.get_owm_mng')
     def test_weather_type_status_atmosphere(self, mock_owm_mng):
@@ -97,8 +98,9 @@ class WeatherStatusTestCase(TestCase):
         observation = Mock()
         mock_owm_mng.weather_at_coords.return_value = observation
         observation.weather.status = 'Atmosphere'
-        condition = weather_type(mock_owm_mng, *self.coordinates)[0]
+        condition, weather = weather_type(mock_owm_mng, *self.coordinates)
         self.assertEqual(condition, 'Snowy/Atmosphere')
+        self.assertIsNotNone(weather.detailed_status)
 
     @patch('music.scripts.weather.get_owm_mng')
     def test_weather_type_status_unknown(self, mock_owm_mng):
@@ -106,20 +108,24 @@ class WeatherStatusTestCase(TestCase):
         observation = Mock()
         mock_owm_mng.weather_at_coords.return_value = observation
         observation.weather.status = 'UnknownCondition'
-        condition = weather_type(mock_owm_mng, *self.coordinates)[0]
+        condition, weather = weather_type(mock_owm_mng, *self.coordinates)
         self.assertEqual(condition, 'Unknown')
+        self.assertIsNotNone(weather)
 
     @patch('music.scripts.weather.get_owm_mng')
-    def test_weather_type_parse_error(self, mock_owm_mng):
-        # Mock the OWM library to raise a ParseAPIResponseError
-        mock_owm_mng.side_effect = ow_exceptions.ParseAPIResponseError("Test error")
+    def test_weather_type_error(self, mock_owm_mng):
+        # Configure the mock to return a mock object with weather_at_coords
+        mock_weather_at_coords = Mock()
+        mock_owm_mng.return_value = mock_weather_at_coords
+
+        # Set a new side effect to simulate an exception
+        mock_weather_at_coords.weather_at_coords.side_effect = Exception("Test error")
 
         # Call the weather_type function 
-        
-        condition, description = weather_type(mock_owm_mng, *self.coordinates)
+        condition, weather = weather_type(mock_owm_mng, *self.coordinates)
 
         # Assert that the function returned (None, None)
         self.assertIsNone(condition)
-        self.assertIsNone(description)
+        self.assertIsNone(weather)
 
         
