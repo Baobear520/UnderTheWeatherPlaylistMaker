@@ -20,7 +20,7 @@ def get_owm_mng(api_key):
         logger.error(f"An unexpected error occurred: {e}")
         return None
 
-def weather_type(mng,lat, lon):
+def weather_type(mng,lat,lon):
     try:
         observation = mng.weather_at_coords(lat=lat, lon=lon)
         weather = observation.weather.status
@@ -43,8 +43,14 @@ def weather_type(mng,lat, lon):
         # If none of the predefined conditions matched
         return 'Unknown', weather
     
+    except AttributeError as e: #if mng is None
+        logger.error(f"{e}")
+        return None, None
+    except AssertionError as e: #if value of lat and lon is invalid
+        logger.error(f"Invalid coordinates: {e}")
+        return None, None
     except Exception as e:
-        logger.error(f'An unexpected error occurred: {e}')
+        logger.error(f"An unexpected error occurred: {e}")
         return None, None
 
 

@@ -11,8 +11,11 @@ def my_IP_location():
         lat,lon = my_loc.latlng
         logger.info('Obtained lat and lon are {lat}, {lon} ')
         return lat,lon
+    except AttributeError as e:
+        logger.error(f"Invalid coordinates: {e}")
+        return None, None
     except Exception as e:
-        logger.error(f"Couldn't obtain user's geolocation coordinates: {e}")
+        logger.error(f"An unexpected error occured: {e}")
         return None,None
     
 

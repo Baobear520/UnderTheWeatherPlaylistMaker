@@ -134,7 +134,7 @@ LOGGING = {
     'disable_existing_loggers': False,
       "formatters": {
         "verbose": {
-            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "format": "{levelname} {asctime} {module} {funcName} {message}",
             "style": "{",
         },
       },
