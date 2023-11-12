@@ -1,33 +1,17 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head> 
+  <link rel="stylesheet" href="{% static 'styles.css' %}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
 </head>
-<style>
-    .button1 {
-        background-color: white;
-        border: 2px solid #4CAF50;
-        border-radius: 8px;
-        color: black;
-        padding: 14px 40px;
-        position: center;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 25px;
-        margin: auto;
-        cursor: pointer;
-        transition-duration: 0.4s;
-      }
-      .button:hover {
-        background-color: #4CAF50; /* Green */
-        color: white;
-      }
-    </style>
-<body>
-    <p>Generates Spotify playlists according to the current weather.</p>
-    <button class="button button1"> 
+<body class="body">
+  <img src='music/static/images/music/home_page/two_phones.png'></img>
+    <h1 class="header1">Generates Spotify playlists according to the current weather.</h1>
+    <p>
+    <button class="button1"> 
     <a href='/create-playlist'>Try it</a></button>
+    </p>
 </html>
