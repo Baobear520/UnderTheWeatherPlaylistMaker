@@ -17,8 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from music import urls as music_urls
+from . import settings
 
 urlpatterns = [
     path('', include(music_urls),name='home'),
     path('admin/', admin.site.urls),
-]
+    ]
+

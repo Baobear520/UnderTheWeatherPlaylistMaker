@@ -1,12 +1,14 @@
 
 h1.header1 {
-    color:white;
+    color:rgb(128, 30, 30);
     font-family:verdana;
     font-size:40px;
 }
-
+body {
+  background-image: url('../images/two_phones.png');
+}
 button.button1 {
-    background-color: green;
+    background-color: rgb(216, 233, 216);
     border: 2px solid #4CAF50;
     border-radius: 8px;
     color: black;
