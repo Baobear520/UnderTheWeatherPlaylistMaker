@@ -62,8 +62,11 @@ def city_ID(mng,lat,lon):
         city_id = location.id
         logger.info(f' Obtained city_id value: {city_id}')
         return city_id
-    except ow_exceptions.ParseAPIResponseError as e:
+    except AssertionError as e:
         logger.error(f"Couldn't obtain city_id: {e}")
+        return None
+    except AttributeError as e: #if mng is None
+        logger.error(f"{e}")
         return None
     except Exception as e:
         logger.error(f'An unexpected error occured: {e}')

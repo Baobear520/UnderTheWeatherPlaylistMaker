@@ -214,5 +214,29 @@ class WeatherStatusTestCase(TestCase):
         self.assertEqual(condition, 'Unknown')
 
 
+class CityIDTestCase(TestCase):
+
+    """Class for testing city_ID function """
+
+    def setUp(self):
+        self.coordinates = (31.470242909455024, 103.28136676508652)
+
+    def test_cityid_success(self):
+        mng = Mock()
+        city_id = city_ID(mng,*self.coordinates)
+        self.assertIsNotNone(city_id)
+    
+    def test_cityid_incorrect_coordinates(self):
+        lat, lon = 'cxcxc', 'ddd'
+        mng = Mock()
+        mng.weather_at_coords.side_effect = AssertionError("Test exception")
+        city_id = city_ID(mng, lat,lon)
+        self.assertIsNone(city_id)
+    
+    def test_cityid_mng_is_none(self):
+        mng = None
+        city_id = city_ID(mng,*self.coordinates)
+        self.assertIsNone(city_id)
+
 
         
