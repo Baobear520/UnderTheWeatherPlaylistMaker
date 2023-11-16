@@ -13,6 +13,9 @@ def get_owm_mng(api_key):
         mng = owm.weather_manager()
         logger.info(f'OpenWeather manager object {mng} has been obtained')
         return mng
+    except AssertionError as e: #if API key is not set
+        logger.error(f"{e}")
+        return None
     except ow_exceptions.UnauthorizedError as e:
         logger.error(f"Coudn't get access to OpenWeather. Please check your internet connection or your api_key validity: {e}")
         return None

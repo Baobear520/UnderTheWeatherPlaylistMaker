@@ -4,7 +4,7 @@ from spotipy.oauth2 import SpotifyOAuth
 from pyowm.owm import OWM
  
 
-
+"""
 def delete_all_playlists():
     sp = spotipy.Spotify(
         auth_manager=SpotifyOAuth(
@@ -30,17 +30,11 @@ def mock_observ():
     except AssertionError as e:
          print(e)
 
-def my_IP_location():
-    #Obtaining geolocation coordinates
+
+
+  
+    
  
-    my_loc = None
-    lat,lon = my_loc.latlng
-    print(lat, lon)
-        
-        
-    #except Exception as e:
-        #print(f"Couldn't obtain user's geolocation coordinates: {e}")
-        
 
 if __name__ == '__main__':
-      my_IP_location()
+"""

@@ -1,18 +1,22 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <title>Create playlist</title>
 </head>
-<body>
-    <h1>We've got a cool playlist for you!</h1>
-    
+<body class="form-body">
+    <h1 class="header2">We've got a cool playlist for you!</h1>
+    <div class="form-container">
         <form id='playlist-form' action="/create-playlist/" method="POST"> 
             {% csrf_token %}
             {{form}}
-          
             <input type="submit" value="Create playlist">
         </form>
-        <div id="openweathermap-widget-12"> </div>
+    </div>
+        <div class="widget" id="openweathermap-widget-12"></div>
         <script>
             window.myWidgetParam ? window.myWidgetParam : window.myWidgetParam = [];  
             window.myWidgetParam.push({
@@ -30,8 +34,6 @@
                 })
             ();
         </script>
-
     
-
 </body>
 </html>
