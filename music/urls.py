@@ -6,8 +6,9 @@ logger = logging.getLogger(__name__)
 
 urlpatterns = [
     path('', view=views.login,name='login'),
-    path('homepage',view=views.home_page,name='home page'),
-    path('create-playlist/',view=views.create_playlist,name='create playlist'),
+    path('home',view=views.home_page,name='home'),
+    path('about',view=views.about,name='about'),
+    path('create-playlist/',view=views.create_playlist,name='create-playlist'),
     path('create-playlist/success',view=views.created,name='created') 
     
 ]

@@ -28,16 +28,18 @@ def login(request):
         # In your login view, after the user is authenticated
         access_token = sp.auth_manager.get_access_token()
         request.session['access_token'] = access_token
-        return redirect('home page')
+        return redirect('home')
     except SpotifyOauthError as e:
         # Handle the exception, you can log it and provide a user-friendly error message
         logger.error(f"Spotify authentication failed: {e}")
-        return render(request, 'error.html', {'error_message': 'Spotify authentication failed'})
+        return render(request, '1/error.html', {'error_message': 'Spotify authentication failed'})
 
     
 def home_page(request):
-    return render(request,'home_page.html')
+    return render(request,'1/home.html')
 
+def about(request):
+    return render(request,'1/about.html')
 
 def create_playlist(request):
 
@@ -70,13 +72,13 @@ def create_playlist(request):
                 #Grab user ID and user_name
                 user_id, user_name = get_user_info(sp)
                 if not user_id and not user_name:
-                    return render(request, 'error.html', {"error_message": "Couldn't get access to your profile information."}, status=404)
+                    return render(request, '1/error.html', {"error_message": "Couldn't get access to your profile information."}, status=404)
 
                 #Generate recommended tracks according to the weather and user's taste
                 items_id = generate_playlist(sp,weather,status)
                
                 if items_id == []:
-                    return render(request, 'error.html', {"error_message": "Couldn't find any tracks for you."}, status=404)
+                    return render(request, '1/error.html', {"error_message": "Couldn't find any tracks for you."}, status=404)
 
                 #Create a new empty playlist
                 playlist = create_new_playlist(sp,user_id,user_name,playlist_name,weather)
@@ -92,7 +94,7 @@ def create_playlist(request):
                 #Adding generated tracks into the new playlist
                 new_playlist = add_tracks_to_playlist(sp,playlist_id,items_id)
                 if not new_playlist:
-                    return render(request, 'error.html', {"error_message": "Couldn't add tracks to {playlist_name} playlist."}, status=404)
+                    return render(request, '1/error.html', {"error_message": "Couldn't add tracks to {playlist_name} playlist."}, status=404)
                 #If successfully populated, redirect to /create-playlist/success url
                 return redirect('created')
             
@@ -100,7 +102,7 @@ def create_playlist(request):
             else:
                 return render(
                     request, 
-                    'create_playlist.html',
+                    '1/create_playlist.html',
                     context={
                         'form': form,
                         'api_key': api_key,
@@ -112,7 +114,7 @@ def create_playlist(request):
             form = PlaylistForm()
             return render(
                         request, 
-                        'create_playlist.html',
+                        '1/create_playlist.html',
                         context={
                             'form': form,
                             'api_key': api_key,
@@ -121,15 +123,15 @@ def create_playlist(request):
                     )
     except SpotifyException as e:
         logger.error(f"Spotify authorization failed: {e}")
-        return render(request, 'error.html', {'error_message': 'Spotify authorization failed. Please log in again.'}, status=401)
+        return render(request, '1/error.html', {'error_message': 'Spotify authorization failed. Please log in again.'}, status=401)
 
     except ow_exceptions.PyOWMError as e:
         logger.error(f"Weather data retrieval failed: {e}")
-        return render(request, 'error.html', {'error_message': 'Weather data retrieval failed. Please try again later.'}, status=500)
+        return render(request, '1/error.html', {'error_message': 'Weather data retrieval failed. Please try again later.'}, status=500)
 
     except Exception as e:
         logger.error(f"An error occurred: {e}")
-        return render(request, 'error.html', {'error_message': 'An unexpected error occurred. Please try again later.'}, status=500)
+        return render(request, '1/error.html', {'error_message': 'An unexpected error occurred. Please try again later.'}, status=500)
 
 
 def created(request):
@@ -139,7 +141,7 @@ def created(request):
     playlist_name = request.session.get('playlist_name','__')
     return render(
         request,
-        'created.html',
+        '1/created.html',
         context = {
             'spotify_link':spotify_link,
             'playlist_name':playlist_name
