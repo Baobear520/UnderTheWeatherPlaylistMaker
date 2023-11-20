@@ -9,7 +9,7 @@ def my_IP_location():
     try: 
         my_loc = geocoder.ip('me')
         lat,lon = my_loc.latlng
-        logger.info('Obtained lat and lon are {lat}, {lon} ')
+        logger.info(f'Obtained lat and lon are {lat}, {lon} ')
         return lat,lon
     except AttributeError as e:
         logger.error(f"Invalid coordinates: {e}")

@@ -11,7 +11,7 @@ def get_owm_mng(api_key):
         owm = OWM(api_key)
         #Obtain the manager object
         mng = owm.weather_manager()
-        logger.info(f'OpenWeather manager object {mng} has been obtained')
+        logger.info(f'OpenWeather manager object has been obtained')
         return mng
     except AssertionError as e: #if API key is not set
         logger.error(f"{e}")
@@ -29,7 +29,7 @@ def weather_type(mng,lat,lon):
         weather = observation.weather.status
         detailed_status = observation.weather.detailed_status
 
-        logging.info(f"Current weather - {weather}, detailed status  - {detailed_status}")
+        logging.info(f"Current weather - '{weather}, detailed status  - '{detailed_status}'")
         #Creating a dictionary of 'condition': conditions_list  like objects
         weather_conditions = {
             'Rainy': ['Thunderstorm', 'Drizzle', 'Rain'],

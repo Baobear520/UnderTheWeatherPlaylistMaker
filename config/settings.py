@@ -163,7 +163,8 @@ LOGGING = {
         },
         'music': {
             'handlers':['file'],
-            'level': 'INFO',   
+            'level': 'INFO', 
+            'propagate': False,  
         }
     },
 }

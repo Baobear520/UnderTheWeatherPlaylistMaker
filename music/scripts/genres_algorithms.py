@@ -106,7 +106,7 @@ def add_random_genres(sp,all_genres,top_genres):
                     logger.info(f'Adding {genre} to the list')
                 number_of_random_genres -= 1
 
-        logger(f"Randomly selected genres are {','.join(random_seed_genres)}")
+        logger.info(f"Randomly selected genres are {','.join(random_seed_genres)}")
         return random_seed_genres
     except Exception as e:
         logger.error(f"An unexpected error occurred: {e}")
