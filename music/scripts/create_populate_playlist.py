@@ -29,7 +29,7 @@ def add_tracks_to_playlist(sp,playlist_id,items_id):
             playlist_id=playlist_id,
             items = items_id 
         )
-        logger.info(f"Playlist with {playlist_id} has been populated with {len(items_id)} tracks.")
+        logger.info(f"Playlist with id '{playlist_id}' has been populated with {len(items_id)} tracks.")
         return new_playlist
     except SpotifyException(reason="Couldn't add tracks to the playlist") as e:
         logger.error(f"Couldn't add tracks to the playlist. Try reloading the page again: {e}")

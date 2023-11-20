@@ -76,6 +76,8 @@ def get_word_search_tracks(sp,status):
         
     # Search for tracks that have "{status}" in their names
     try:
+        if status == 'Clear':
+            status = 'Sunny'
         word_search = sp.search(q=status, type='track', limit=5)
         word_search_tracks = word_search['tracks']['items']
         logger.info(f'We got {len(word_search_tracks)} tracks that contain the word {status}')

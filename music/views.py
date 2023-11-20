@@ -30,9 +30,7 @@ def login(request):
         logger.info('Spotify user has been authenticated')
         # In your login view, after the user is authenticated
         access_token = sp.auth_manager.get_access_token()
-        user_name = sp.user('me')
         request.session['access_token'] = access_token
-        request.session['username'] = user_name
         return redirect('create-playlist')
     
     except SpotifyOauthError as e:
@@ -47,7 +45,6 @@ def about(request):
 
 def contacts(request):
     return render(request,'contacts.html')
-
 
 def create_playlist(request):
 
