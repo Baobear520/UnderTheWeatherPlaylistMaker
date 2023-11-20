@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Error</title>
-</head>
-<body>
-    <div class="container">
-        <h1>Error</h1>
-        <Please>{{ error_message }} Please try reloading the page in your browser</p>
-    </div>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="alert alert-danger mt-4">
+    <h4 class="alert-heading">Error!</h4>
+    <p>{{ error_message }}</p>
+</div>
+{% endblock %}

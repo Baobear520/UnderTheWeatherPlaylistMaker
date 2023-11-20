@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}"></link>
+{% endblock %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">"UnderTheWeather" Spotify Playlist Maker</h1>
+    <p class="lead">Allows Spotify users generate unique playlists that match the current weather.</p>
+    <a href="/login" class="btn btn-primary btn-lg">Login to Spotify</a>
+</div>
+{% endblock %}
+

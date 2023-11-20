@@ -2,10 +2,10 @@ from django import forms
 from .scripts.user_data import get_all_playlists_names
 class PlaylistForm(forms.Form):
     playlist_name = forms.CharField(
-        max_length=64, 
+        max_length=20, 
         widget=forms.TextInput(
             attrs={
-                'placeholder': 'Enter the name here'
+                'placeholder': 'Enter the name here',
             }
         )
     )
@@ -20,8 +20,8 @@ class PlaylistForm(forms.Form):
         if self.sp is not None:
             all_playlists_names = get_all_playlists_names(self.sp)
             if playlist_name in all_playlists_names:
-                raise forms.ValidationError('Playlist with this name already exists')
-        
+                raise forms.ValidationError(
+                    message='Playlist with this name already exists',)
         return playlist_name
 
 
