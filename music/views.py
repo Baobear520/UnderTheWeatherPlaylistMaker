@@ -3,7 +3,7 @@ from django.shortcuts import redirect, render
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth,SpotifyOauthError
 from pyowm.commons import exceptions as ow_exceptions
-from config.credentials import OWM_API_KEY
+from config.settings.base import OWM_API_KEY
 from .scripts.location import my_IP_location
 from .scripts.user_data import get_user_info
 from .scripts.create_populate_playlist import *
