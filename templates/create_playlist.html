@@ -31,6 +31,7 @@
             </div>
     <div class="col-md-8 offset-md-2">
         <h1>Welcome, {{username}}!</h1>
+        <h2>It seems that it's  {{weather_type|lower}} weather today. 
         <h2>Create a Playlist</h2>
         <form method="post" action="{% url 'create-playlist' %}">
             {% csrf_token %}

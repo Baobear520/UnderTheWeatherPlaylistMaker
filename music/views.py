@@ -57,7 +57,7 @@ def create_playlist(request):
         #Obtain weather data for the widget and further use
         weather, status = weather_type(mng,lat,lon)
         city_id = city_ID(mng,lat,lon)
-
+       
         #Obtain Spotify access token
         access_token = request.session.get('access_token')
         if not access_token:
@@ -111,7 +111,6 @@ def create_playlist(request):
                     context={
                         'form': form,
                         'api_key': api_key,
-                        'city_id': city_id,
                         'username': user_name
                     }
                 )
@@ -125,7 +124,8 @@ def create_playlist(request):
                             'form': form,
                             'api_key': api_key,
                             'city_id': city_id,
-                            'username': user_name
+                            'username': user_name,
+                            'weather_type': weather,
                         }
                     )
     except SpotifyException as e:
