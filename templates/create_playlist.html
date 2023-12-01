@@ -31,8 +31,9 @@
             </div>
     <div class="col-md-8 offset-md-2">
         <h1>Welcome, {{username}}!</h1>
-        <h2>It seems that it's  {{weather_type|lower}} weather today. 
-        <h2>Create a Playlist</h2>
+        <h5>It seems that it's  {{weather_type|lower}} today. We've got tracks that could suit your mood!</h5>
+        <p> 
+        <h3>Create a playlist </h3>
         <form method="post" action="{% url 'create-playlist' %}">
             {% csrf_token %}
             {{ form.as_p }}
