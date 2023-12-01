@@ -6,11 +6,8 @@
 
 {% block content %}
 <div class="mt-5">
-    <h2>Your playlist "{{ playlist_name }}" has been created! </h2>
-    <p>
-    <div class="link">    
-    <a href="{{ spotify_link }}" target="_blank">Listen on Spotify</a>
-    </p>
+    <h2>Your playlist "{{ playlist_name }}" has been created! </h2>   
+    <a href="{{ spotify_link }}" target="_blank" class="btn btn-success btn-lg">Listen on Spotify</a>
 </div>
 </div>
 {% endblock %}

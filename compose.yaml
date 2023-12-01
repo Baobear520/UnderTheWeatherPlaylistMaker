@@ -15,7 +15,7 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - /Users/aldmikon/Desktop/Python_road/Projects/MoodyPlaylist:/app  # Adjust the paths accordingly
+      - /app  # Adjust the paths accordingly
     environment:
       - DJANGO_LOG_LEVEL
       - SPOTIPY_CLIENT_ID

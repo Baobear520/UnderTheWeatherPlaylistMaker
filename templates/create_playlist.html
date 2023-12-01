@@ -6,40 +6,25 @@
 {% endblock %}
 
 {% block content %}
-<div class="row mt-5">
-            <!-- Weather Widget -->
-            <div class="weather-widget">
-                <div id="openweathermap-widget-12"></div>
-                <script>
-                    window.myWidgetParam ? window.myWidgetParam : window.myWidgetParam = [];
-                    window.myWidgetParam.push({
-                        id: 12,
-                        cityid: '{{city_id}}',
-                        appid: '{{api_key}}',
-                        units: 'metric',
-                        containerid: 'openweathermap-widget-12',
-                    });
-                    (function () {
-                        var script = document.createElement('script');
-                        script.async = true;
-                        script.charset = "utf-8";
-                        script.src = "//openweathermap.org/themes/openweathermap/assets/vendor/owm/js/weather-widget-generator.js";
-                        var s = document.getElementsByTagName('script')[0];
-                        s.parentNode.insertBefore(script, s);
-                    })();
-                </script>
-            </div>
-    <div class="col-md-8 offset-md-2">
-        <h1>Welcome, {{username}}!</h1>
-        <h5>It seems that it's  {{weather_type|lower}} today. We've got tracks that could suit your mood!</h5>
-        <p> 
-        <h3>Create a playlist </h3>
+
+    
+    <h1 class="display-4"> Welcome, {{username}}!</h1>
+        <!-- Weather Widget -->
+        <div id="openweathermap-widget-9"></div>
+        <script>window.myWidgetParam ? window.myWidgetParam : window.myWidgetParam = [];  
+            window.myWidgetParam.push({
+                id: 9,
+                cityid: '{{city_id}}',appid: '{{api_key}}',units: 'metric',containerid: 'openweathermap-widget-9',  });  (function() {var script = document.createElement('script');script.async = true;script.charset = "utf-8";script.src = "//openweathermap.org/themes/openweathermap/assets/vendor/owm/js/weather-widget-generator.js";var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(script, s);  })();</script>
+
+        <p class="lead">It seems it's {{weather_type|lower}} today.</p>
+        <p class="lead">We've got tracks that could suit your mood. Let's try!</p>
+        <p>
+        <h4>Create playlist</h4></p>
         <form method="post" action="{% url 'create-playlist' %}">
             {% csrf_token %}
             {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Create Playlist</button>
+            <button type="submit" class="btn btn-success">Create Playlist</button>
         </form>
-
         {% if form.errors %}
             <div class="alert alert-danger mt-3">
                 <h4 class="alert-heading">Error!</h4>
@@ -50,8 +35,6 @@
    
     </div>
 
-    </div>
-</div>
 {% endblock %}
 
 
