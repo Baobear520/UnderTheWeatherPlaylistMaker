@@ -6,9 +6,9 @@ name = "pypi"
 [packages]
 django = "*"
 spotipy = "*"
-pandas = "*"
 pyowm = "*"
 geocoder = "*"
+gunicorn = "*"
 
 [dev-packages]
 
