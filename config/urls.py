@@ -22,7 +22,7 @@ from music import urls as music_urls
 
 
 urlpatterns = [
-    path('', include(music_urls),name='music'),
+    path('undertheweatherplaylistmaker2/', include(music_urls),name='music'),
     path('admin/', admin.site.urls),
     ]
 if settings.DEBUG == True:
