@@ -23,7 +23,6 @@ def login(request):
     try:
         sp = Spotify(
             auth_manager=SpotifyOAuth(
-                redirect_uri='http://localhost:8080',
                 scope='user-library-read user-top-read playlist-modify-public'
             )
         )

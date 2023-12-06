@@ -166,4 +166,5 @@ LOGGING = {
 OWM_API_KEY = os.environ.get('OPENWEATHER_API_KEY')
 SPOTIPY_CLIENT_ID = os.environ.get('SPOTIPY_CLIENT_ID')
 SPOTIPY_CLIENT_SECRET = os.environ.get('SPOTIPY_CLIENT_SECRET')
+SPOTIPY_REDIRECT_URI = 'https://lionfish-app-divyi.ondigitalocean.app/create-playlist'
 ALLOWED_HOSTS = ['*']
