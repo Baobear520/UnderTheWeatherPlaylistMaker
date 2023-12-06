@@ -60,7 +60,7 @@ def create_playlist(request):
         #Obtain Spotify access token
         access_token = request.session.get('access_token')
         if not access_token:
-            return render(request,'error.html',status=401)
+            return render(request,'error.html',{"error_message": "No access token provided."},status=401)
         #Pass the access token
         sp = Spotify(auth=access_token['access_token'])
 
