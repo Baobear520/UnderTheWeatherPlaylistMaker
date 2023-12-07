@@ -1,7 +1,7 @@
 import logging
 from django.shortcuts import redirect, render
-from spotipy import Spotify
-from spotipy.oauth2 import SpotifyOAuth,SpotifyOauthError
+from spotipy import Spotify, DjangoSessionCacheHandler
+from spotipy.oauth2 import SpotifyOAuth
 from pyowm.commons import exceptions as ow_exceptions
 from config.settings.base import OWM_API_KEY
 from .scripts.location import my_IP_location
@@ -12,48 +12,50 @@ from .scripts.weather import city_ID,weather_type,get_owm_mng
 from .forms import PlaylistForm
 
 
+
 logger = logging.getLogger(__name__)
 
-def home_page(request):
-    return render(request,'home.html')
-
-def test_login(request):
-    sp = Spotify(
-            auth_manager=SpotifyOAuth(
-                scope='user-library-read user-top-read playlist-modify-public',
-                open_browser=False,
-                requests_timeout=10,
-            )
-        )
-    if sp is not None:
-        logger.info('Spotify user has been authenticated')
-        return redirect('create-playlist')
-    logger.error(f"Spotify authentication failed")
-    return render(request, 'error.html', {'error_message': 'Spotify authentication failed'})
 
 
 def login(request):
-    #Autentication
-    try:
-        sp = Spotify(
-            auth_manager=SpotifyOAuth(
-                scope='user-library-read user-top-read playlist-modify-public',
-                open_browser=False,
-                requests_timeout=10,
-            )
+    # If request.code exists, then we are set and we can authenticate the user
+    if request.code:
+        cache_handler = DjangoSessionCacheHandler(request)
+        auth_manager = SpotifyOAuth(
+            scope='user-library-read user-top-read playlist-modify-public',
+            cache_handler=cache_handler,
+            show_dialog=True,
         )
-        logger.info('Spotify user has been authenticated')
-        # In your login view, after the user is authenticated
-        access_token = sp.auth_manager.get_access_token()
-        request.session['access_token'] = access_token
-        return redirect('create-playlist')
-    
-    except SpotifyOauthError as e:
-        # Handle the exception, you can log it and provide a user-friendly error message
-        logger.error(f"Spotify authentication failed: {e}")
-        return render(request, 'error.html', {'error_message': 'Spotify authentication failed'})
+        auth_manager.get_access_token(request.code)
+        return redirect("create-playlist")
 
-    
+    # Else, redirect them to authenticate
+    return redirect("authenticate")
+
+# url to this view is authenticate/
+def authenticate(request):
+    context = {}
+    cache_handler = DjangoSessionCacheHandler(request)
+    auth_manager = SpotifyOAuth(
+        scope='user-library-read user-top-read playlist-modify-public',
+        cache_handler=cache_handler)
+    if auth_manager.validate_token(cache_handler.get_cached_token()):
+        # If token already exists and is valid, redirect them to the home page
+        return redirect("create-playlist")
+
+    # Make sure your client_id/client_secret/redirect_uri environment variables are set
+    auth_manager = SpotifyOAuth(
+        scope='user-library-read user-top-read playlist-modify-public',
+        cache_handler=cache_handler,
+        show_dialog=True,
+    )
+
+    # In authenticate page there is a link button with href set to context["auth_url"]
+    context["auth_url"] = auth_manager.get_authorize_url()
+
+    return render(request, "login.html", context)
+
+
 def about(request):
     return render(request,'about.html')
 
@@ -62,7 +64,8 @@ def contacts(request):
     return render(request,'contacts.html')
 
 def create_playlist(request):
-
+   
+    
     #Authorize requests to OpenWeather widget
     try:
         api_key = OWM_API_KEY
@@ -72,14 +75,16 @@ def create_playlist(request):
         #Obtain weather data for the widget and further use
         weather, status = weather_type(mng,lat,lon)
         city_id = city_ID(mng,lat,lon)
-       
-        #Obtain Spotify access token
-        access_token = request.session.get('access_token')
-        if not access_token:
-            return render(request,'error.html',{"error_message": "No access token provided."},status=401)
-        #Pass the access token
-        sp = Spotify(auth=access_token['access_token'])
+        
+        cache_handler = DjangoSessionCacheHandler(request)
+        auth_manager = SpotifyOAuth(
+            scope='user-library-read user-top-read playlist-modify-public',
+            cache_handler=cache_handler)
+        if not auth_manager.validate_token(cache_handler.get_cached_token()):
+            return redirect('home')
 
+        sp = Spotify(auth_manager=auth_manager)
+        
         #Grab user ID and user_name
         user_id, user_name = get_user_info(sp)
         if not user_id and not user_name:
@@ -154,7 +159,7 @@ def create_playlist(request):
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return render(request, 'error.html', {'error_message': 'An unexpected error occurred. Please try again later.'}, status=500)
-
+    
 
 def created(request):
 
