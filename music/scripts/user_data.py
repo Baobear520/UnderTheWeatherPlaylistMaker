@@ -1,4 +1,5 @@
 import logging
+from spotipy import Spotify, SpotifyOAuth
 from spotipy.exceptions import SpotifyException
 
 logger = logging.getLogger(__name__)
@@ -37,7 +38,7 @@ def get_all_playlists_names(sp):
 
 #Get a list of most popular genres from user's top artists list
 def get_top_genres_from_artists(sp):
-    # Get the user's liked tracks
+    
     try:
         top_artists = sp.current_user_top_artists(limit=20,time_range='long_term')
         logger.info(f"Obtained a list of user's top-20 artists")
