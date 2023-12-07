@@ -27,10 +27,7 @@ def test_login(request):
         )
     if sp is not None:
         logger.info('Spotify user has been authenticated')
-        access_token = sp.auth_manager.get_access_token()
-        request.session['access_token'] = access_token
-        logger.info('Access token obtained')
-        return redirect('about')
+        return redirect('create-playlist')
     logger.error(f"Spotify authentication failed")
     return render(request, 'error.html', {'error_message': 'Spotify authentication failed'})
 
