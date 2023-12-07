@@ -17,13 +17,32 @@ logger = logging.getLogger(__name__)
 def home_page(request):
     return render(request,'home.html')
 
+def test_login(request):
+    sp = Spotify(
+            auth_manager=SpotifyOAuth(
+                scope='user-library-read user-top-read playlist-modify-public',
+                open_browser=False,
+                requests_timeout=10,
+            )
+        )
+    if sp is not None:
+        logger.info('Spotify user has been authenticated')
+        access_token = sp.auth_manager.get_access_token()
+        request.session['access_token'] = access_token
+        logger.info('Access token obtained')
+        return redirect('about')
+    logger.error(f"Spotify authentication failed")
+    return render(request, 'error.html', {'error_message': 'Spotify authentication failed'})
+
 
 def login(request):
     #Autentication
     try:
         sp = Spotify(
             auth_manager=SpotifyOAuth(
-                scope='user-library-read user-top-read playlist-modify-public'
+                scope='user-library-read user-top-read playlist-modify-public',
+                open_browser=False,
+                requests_timeout=10,
             )
         )
         logger.info('Spotify user has been authenticated')
