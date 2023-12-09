@@ -7,7 +7,7 @@ from config.settings.base import OWM_API_KEY
 from .scripts.location import my_IP_location
 from .scripts.user_data import get_user_info
 from .scripts.create_populate_playlist import *
-from .scripts.playlist_algorithms import generate_playlist
+from .scripts.playlist_algorithms import get_shortlisted_tracks
 from .scripts.weather import city_ID,weather_type,get_owm_mng
 from .forms import PlaylistForm
 
@@ -88,7 +88,7 @@ def create_playlist(request):
         #Grab user ID and user_name
         user_id, user_name = get_user_info(sp)
         if not user_id and not user_name:
-            return render(request, 'error.html', {"error_message": "Couldn't get access to your profile information."}, status=404)
+            return render(request, 'error.html', {"error_message": "Couldn't get access to your profile information. Make sure you're connected to Internet."}, status=404)
         
         if request.method == 'POST':
             #Instantiate a PlaylistForm class with data from user's input
@@ -100,15 +100,15 @@ def create_playlist(request):
                 request.session['playlist_name'] = playlist_name
 
                 #Generate recommended tracks according to the weather and user's taste
-                items_id = generate_playlist(sp,weather,status)
+                items_id = get_shortlisted_tracks(sp,weather,status)
                
                 if items_id == []:
-                    return render(request, 'error.html', {"error_message": "Couldn't find any tracks for you."}, status=404)
+                    return render(request, 'error.html', {"error_message": "Couldn't find any tracks for you. Check your Internet connection or try again later."}, status=404)
 
                 #Create a new empty playlist
                 playlist = create_new_playlist(sp,user_id,user_name,playlist_name,weather)
                 if not playlist:
-                    return render(request, 'error.html', {"error_message": "Couldn't create a new playlist."}, status=404)
+                    return render(request, 'error.html', {"error_message": "Couldn't create a new playlist. Make sure you're connected to Internet"}, status=404)
                 
                 playlist_id = playlist['id']
                 playlist_url = playlist['external_urls']['spotify']
@@ -119,7 +119,7 @@ def create_playlist(request):
                 #Adding generated tracks into the new playlist
                 new_playlist = add_tracks_to_playlist(sp,playlist_id,items_id)
                 if not new_playlist:
-                    return render(request, 'error.html', {"error_message": "Couldn't add tracks to {playlist_name} playlist."}, status=404)
+                    return render(request, 'error.html', {"error_message": "Couldn't add tracks to {playlist_name} playlist.Make sure you're connected to Internet."}, status=404)
                 #If successfully populated, redirect to /create-playlist/success url
                 return redirect('created')
             
@@ -148,9 +148,9 @@ def create_playlist(request):
                             'weather_type': weather,
                         }
                     )
-    except SpotifyException as e:
+    except SpotifyException (http_status=401,code=1,msg='Spotify authorization failed. Please log in again.') as e:
         logger.error(f"Spotify authorization failed: {e}")
-        return render(request, 'error.html', {'error_message': 'Spotify authorization failed. Please log in again.'}, status=401)
+        return render(request, 'error.html', {'error_message': 'Spotify authorization failed. Please try again.'}, status=401)
 
     except ow_exceptions.PyOWMError as e:
         logger.error(f"Weather data retrieval failed: {e}")
