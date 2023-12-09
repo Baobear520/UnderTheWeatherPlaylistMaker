@@ -29,6 +29,7 @@
             <div class="alert alert-danger mt-3">
                 <h4 class="alert-heading">Error!</h4>
                 {% for error in form.errors %}
+                Playlist with this name already exists in your library. Choose a unique name for your playlist.
                 {% endfor %}
             </div>
         {% endif %}
