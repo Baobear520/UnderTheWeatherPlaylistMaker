@@ -56,9 +56,9 @@ def get_recommended_tracks(sp,weather):
         #Search for track recommendations on Spotify
         data = sp.recommendations(
             **criterea,
-            limit=45,
+            limit=100,
             seed_genres=seed_genres,
-            min_popularity=25,
+            min_popularity=20,
             )
 
         recommended_tracks = data['tracks']
@@ -78,7 +78,7 @@ def get_word_search_tracks(sp,status):
     try:
         if status == 'Clear':
             status = 'Sunny'
-        word_search = sp.search(q=status, type='track', limit=5)
+        word_search = sp.search(q=status, type='track', limit=10)
         word_search_tracks = word_search['tracks']['items']
         logger.info(f'We got {len(word_search_tracks)} tracks that contain the word {status}')
         return word_search_tracks
@@ -90,24 +90,47 @@ def get_word_search_tracks(sp,status):
         return []
 
 
-def generate_playlist(sp,weather,status):
+def generate_tracks(sp,weather,status):
     try:
         recommended_tracks = get_recommended_tracks(sp,weather)
         word_search_tracks = get_word_search_tracks(sp,status)
 
         # Combine recommended tracks and tracks from word search
         final_list = recommended_tracks + word_search_tracks
-        if len(final_list) > 1:
-            random.shuffle(final_list)
-            
-        #Grab a list of track ID's
-        items_id = [item['id'] for item in final_list]
-        return items_id
+        return final_list
+    
+    except TypeError as e:
+        logger.error(f"{e}")
+        return []
     except Exception as e:
         logger.error(f"An unexpected error occurred: {e}")
         return []
     
-   
+def get_shortlisted_tracks(sp,weather,status):
+    try:
+        final_list = generate_tracks(sp,weather,status)
+        number_of_final_tracks = len(final_list) 
+        if number_of_final_tracks < 50:
+            k == number_of_final_tracks
+        k = 50
+        random.shuffle(final_list)
+        short_list = final_list[:k]
+        logger.info(f'Shortlisted {len(short_list)} randomly selected tracks from the final list')
+        
+        #Grab a list of track ID's
+        items_id = [item['id'] for item in short_list]
+        return items_id
+    
+    except TypeError as e:
+        logger.error(f"{e}")
+        return []
+    except Exception as e:
+        logger.error(f"An unexpected error occurred: {e}")
+        return []
+
+
+
+
 
     
 
