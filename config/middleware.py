@@ -8,7 +8,7 @@ from spotipy.oauth2 import SpotifyOAuth
 
 
 def is_user_authenticated(get_response):
-    # Initialize request.code because we'll be using that in the index function in views.py
+    # Initialize request.code because we'll be using that in the login function in views.py
     def middleware(request):
         request.code = None
         if "authenticate" not in request.path:
@@ -17,7 +17,7 @@ def is_user_authenticated(get_response):
             # In the function authenticate in views.py, we passed context["auth_url"] to
             # the html so the user can press the link and get sent to the spotify
             # authentication page, once they accept/refuse they will get redirected back
-            # to / that the index function handles, but before that happens we must
+            # to / that the login function handles, but before that happens we must
             # capture the code that the authentication link gave us and put it in request.code
             if request.method == "GET" and request.GET.get("code"):
                 request.code = request.GET.get("code")

@@ -24,16 +24,6 @@ def delete_all_playlists():
             print(f"Playlist {playlist['name']} has been deleted")
     except Exception as e:
             print('No playlists found')
-"""
-def mock_observ():
-    #owm = OWM(api_key=os.environ.get('OPENWEATHER_API_KEY'))
-    #Obtain the manager object
-    try:
-        mng = None
-        observation = mng.weather_at_coords(lat=40.00, lon=50.00)
-        print(observation)
-    except AssertionError as e:
-         print(e)
-"""
+
 if __name__ == '__main__':
      delete_all_playlists()
