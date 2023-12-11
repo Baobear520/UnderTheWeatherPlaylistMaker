@@ -1,8 +1,8 @@
 from .base import *
 
 
-
 DEBUG = True
 
-SECRET_KEY = 'django-insecure-n-1dtdwz+#l!mk)e$#$v7k1k+z8=hjisw+$rw6y__=ammt5l$g'
+ALLOWED_HOSTS = ['127.0.0.1']
 
+SECRET_KEY = '_!acfcjalq49#s#y4o*92se1mv=yumpsmzcdnbd^sx$l_s8ko6'

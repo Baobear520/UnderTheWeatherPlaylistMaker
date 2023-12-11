@@ -9,6 +9,7 @@ spotipy = "*"
 pyowm = "*"
 geocoder = "*"
 gunicorn = "*"
+whitenoise = "*"
 
 [dev-packages]
 
