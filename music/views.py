@@ -81,7 +81,7 @@ def create_playlist(request):
             scope='user-library-read user-top-read playlist-modify-public',
             cache_handler=cache_handler)
         if not auth_manager.validate_token(cache_handler.get_cached_token()):
-            return redirect('home')
+            return redirect('login')
 
         sp = Spotify(auth_manager=auth_manager)
         
