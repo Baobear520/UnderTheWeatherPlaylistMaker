@@ -27,7 +27,8 @@ def login(request):
             show_dialog=True,
         )
         auth_manager.get_access_token(request.code)
-        return redirect("create-playlist")
+
+        return redirect("login-success")
 
     # Else, redirect them to authenticate
     return redirect("authenticate")
@@ -41,7 +42,7 @@ def authenticate(request):
         cache_handler=cache_handler)
     if auth_manager.validate_token(cache_handler.get_cached_token()):
         # If token already exists and is valid, redirect them to the home page
-        return redirect("create-playlist")
+        return redirect("login-success")
 
     # Make sure your client_id/client_secret/redirect_uri environment variables are set
     auth_manager = SpotifyOAuth(
@@ -55,6 +56,26 @@ def authenticate(request):
 
     return render(request, "login.html", context)
 
+def login_success(request):
+    cache_handler = DjangoSessionCacheHandler(request)
+    auth_manager = SpotifyOAuth(
+            scope='user-library-read user-top-read playlist-modify-public',
+            cache_handler=cache_handler)
+    if not auth_manager.validate_token(cache_handler.get_cached_token()):
+        return redirect('login')
+    sp = Spotify(auth_manager=auth_manager)
+        
+    #Grab user ID and user_name
+    user_id, user_name = get_user_info(sp)
+
+    if not user_id and not user_name:
+        return render(request, 'error.html', 
+                {"error_message": "Couldn't get access to your profile information. Make sure you're connected to Internet."}, 
+                status=404)
+    request.session['user_name'] = user_name
+    return render(request,
+        'login_success.html',
+        context={'username':user_name,'user_id':user_id})
 
 def about(request):
     return render(request,'about.html')
@@ -65,12 +86,14 @@ def contacts(request):
 
 def create_playlist(request):
    
-    
     #Authorize requests to OpenWeather widget
     try:
         api_key = OWM_API_KEY
         #Obtain coordinates for the weather API
-        lat, lon = my_IP_location()
+        lat = float(request.POST.get('lat') or request.GET.get('lat'))
+        lon = float(request.POST.get('lon') or request.GET.get('lon'))
+        print(lat, lon)
+        print(lat,lon)
         mng = get_owm_mng(api_key)
         #Obtain weather data for the widget and further use
         weather, status = weather_type(mng,lat,lon)
@@ -82,14 +105,10 @@ def create_playlist(request):
             cache_handler=cache_handler)
         if not auth_manager.validate_token(cache_handler.get_cached_token()):
             return redirect('login')
-
+        
         sp = Spotify(auth_manager=auth_manager)
-        
-        #Grab user ID and user_name
-        user_id, user_name = get_user_info(sp)
-        if not user_id and not user_name:
-            return render(request, 'error.html', {"error_message": "Couldn't get access to your profile information. Make sure you're connected to Internet."}, status=404)
-        
+        user_name = request.session.get('user_name',None)
+        user_id = request.session.get('user_id',None)
         if request.method == 'POST':
             #Instantiate a PlaylistForm class with data from user's input
             form = PlaylistForm(request.POST,sp=sp)
@@ -98,7 +117,6 @@ def create_playlist(request):
             
                 #Passing the playlist name into sessions
                 request.session['playlist_name'] = playlist_name
-
                 #Generate recommended tracks according to the weather and user's taste
                 items_id = get_shortlisted_tracks(sp,weather,status)
                
@@ -148,7 +166,7 @@ def create_playlist(request):
                             'weather_type': weather,
                         }
                     )
-    except SpotifyException (http_status=401,code=1,msg='Spotify authorization failed. Please log in again.') as e:
+    except SpotifyException as e:
         logger.error(f"Spotify authorization failed: {e}")
         return render(request, 'error.html', {'error_message': 'Spotify authorization failed. Please try again.'}, status=401)
 
