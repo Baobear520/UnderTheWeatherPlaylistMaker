@@ -4,7 +4,6 @@ from spotipy import Spotify, DjangoSessionCacheHandler
 from spotipy.oauth2 import SpotifyOAuth
 from pyowm.commons import exceptions as ow_exceptions
 from config.settings.base import OWM_API_KEY
-from .scripts.location import my_IP_location
 from .scripts.user_data import get_user_info
 from .scripts.create_populate_playlist import *
 from .scripts.playlist_algorithms import get_shortlisted_tracks
