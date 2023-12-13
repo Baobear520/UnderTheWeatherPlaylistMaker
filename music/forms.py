@@ -9,6 +9,7 @@ class PlaylistForm(forms.Form):
             }
         )
     )
+ 
 
     def __init__(self, *args, **kwargs):
         # Pass the 'sp' object to the form's constructor

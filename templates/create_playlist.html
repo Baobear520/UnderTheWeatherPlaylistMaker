@@ -23,8 +23,6 @@
         <h4>Create playlist</h4></p>
         <form method="post" action="{% url 'create-playlist' %}">
             {% csrf_token %}
-            <input type="hidden" name="lat" value="{{ lat }}">
-            <input type="hidden" name="lon" value="{{ lon }}"> 
             {{ form.as_p }} 
             <button type="submit" class="btn btn-success">Create Playlist</button>
         </form>
