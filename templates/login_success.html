@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}"></link>
+{% endblock %}
+
+{% block content %}
+
+<h1 class="display-4"> Welcome, {{username}}!</h1>
+    <p class="lead">Obtaining your current geolocation coordinates. Do not leave the page. 
+    </p>
+    <script>
+        // Function to handle the success of obtaining the location
+        function successCallback(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+    
+            // Redirect to create_playlist view with lat and lon as query parameters
+            window.location.href = `/create-playlist/?lat=${lat}&lon=${lon}`;
+        }
+    
+        // Function to handle the error in obtaining the location
+        function errorCallback(error) {
+            alert(`Error obtaining location: ${error.message}`);
+        }
+    
+        // Request the user's location when the page loads
+        window.onload = function () {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        };
+    </script>
+{% endblock %}

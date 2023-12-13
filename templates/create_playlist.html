@@ -9,6 +9,7 @@
 
     
     <h1 class="display-4"> Welcome, {{username}}!</h1>
+
         <!-- Weather Widget -->
         <div id="openweathermap-widget-9"></div>
         <script>window.myWidgetParam ? window.myWidgetParam : window.myWidgetParam = [];  
@@ -22,7 +23,9 @@
         <h4>Create playlist</h4></p>
         <form method="post" action="{% url 'create-playlist' %}">
             {% csrf_token %}
-            {{ form.as_p }}
+            <input type="hidden" name="lat" value="{{ lat }}">
+            <input type="hidden" name="lon" value="{{ lon }}"> 
+            {{ form.as_p }} 
             <button type="submit" class="btn btn-success">Create Playlist</button>
         </form>
         {% if form.errors %}
