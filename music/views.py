@@ -84,86 +84,44 @@ def about(request):
 def contacts(request):
     return render(request,'contacts.html')
 
+
 def create_playlist(request):
-    if request.method == 'GET':
-    #Authorize requests to OpenWeather widget
-        try:
-            api_key = OWM_API_KEY
-            #Obtain coordinates for the weather API
-            
+    try:
+        api_key = OWM_API_KEY
+
+        if request.method == 'GET':
+            # Obtain coordinates for the weather API
             lat = float(request.GET.get('lat'))
             lon = float(request.GET.get('lon'))
-            
+
             request.session['lat'] = lat
             request.session['lon'] = lon
 
-            mng = get_owm_mng(api_key)
-            #Obtain weather data for the widget and further use
-            weather, status = weather_type(mng,lat,lon)
-            city_id = city_ID(mng,lat,lon)
-            
-            cache_handler = DjangoSessionCacheHandler(request)
-            auth_manager = SpotifyOAuth(
-                scope='user-library-read user-top-read playlist-modify-public',
-                cache_handler=cache_handler)
-            if not auth_manager.validate_token(cache_handler.get_cached_token()):
-                return redirect('login')
-            
-            sp = Spotify(auth_manager=auth_manager)
-            user_name = request.session.get('username',None)
-            user_id = request.session.get('user_id',None)
-            print(user_id,user_name)
-
-            form = PlaylistForm()
-            return render(
-                        request, 
-                        'create_playlist.html',
-                        context={
-                            'form': form,
-                            'api_key': api_key,
-                            'city_id': city_id,
-                            'username': user_name,
-                            'weather_type': weather,
-                        }
-                    )
-        
-        except SpotifyException as e:
-            logger.error(f"Spotify authorization failed: {e}")
-            return render(request, 'error.html', {'error_message': 'Spotify authorization failed. Please try again.'}, status=401)
-
-        except ow_exceptions.PyOWMError as e:
-            logger.error(f"Weather data retrieval failed: {e}")
-            return render(request, 'error.html', {'error_message': 'Weather data retrieval failed. Please try again later.'}, status=500)
-        
-        except Exception as e:
-            logger.error(f"An error occurred: {e}")
-            return render(request, 'error.html', {'error_message': 'An unexpected error occurred. Please try again later.'}, status=500)
-        
-    if request.method == 'POST':
-        try:
-            api_key = OWM_API_KEY
-            #Obtain coordinates for the weather API
+        elif request.method == 'POST':
+            # Obtain coordinates for the weather API from the session
             lat = request.session.get('lat')
             lon = request.session.get('lon')
-            mng = get_owm_mng(api_key)
 
-            #Obtain weather data for the widget and further use
-            weather, status = weather_type(mng,lat,lon)
-            city_id = city_ID(mng,lat,lon)
-            
-            cache_handler = DjangoSessionCacheHandler(request)
-            auth_manager = SpotifyOAuth(
-                scope='user-library-read user-top-read playlist-modify-public',
-                cache_handler=cache_handler)
-            
-            if not auth_manager.validate_token(cache_handler.get_cached_token()):
-                return redirect('login')
-            
-            sp = Spotify(auth_manager=auth_manager)
-            user_name = request.session.get('username',None)
-            user_id = request.session.get('user_id',None)
-            print(user_id,user_name)
+        mng = get_owm_mng(api_key)
 
+        # Obtain weather data for the widget and further use
+        weather, status = weather_type(mng, lat, lon)
+        city_id = city_ID(mng, lat, lon)
+
+        cache_handler = DjangoSessionCacheHandler(request)
+        auth_manager = SpotifyOAuth(
+            scope='user-library-read user-top-read playlist-modify-public',
+            cache_handler=cache_handler)
+
+        if not auth_manager.validate_token(cache_handler.get_cached_token()):
+            return redirect('login')
+
+        sp = Spotify(auth_manager=auth_manager)
+        user_name = request.session.get('username', None)
+        user_id = request.session.get('user_id', None)
+
+        if request.method == 'POST':
+            
             #Instantiate a PlaylistForm class with data from user's input
             form = PlaylistForm(request.POST,sp=sp)
             if form.is_valid(): #If user's input is valid, grab the value
@@ -197,28 +155,43 @@ def create_playlist(request):
             
             #If the form is not valid, render the same page with error message from the form
             else:
+                
                 return render(
                     request, 
                     'create_playlist.html',
                     context={
                         'form': form,
                         'api_key': api_key,
-                        'username': user_name
+                        'username': user_name,
+                        'city_id':city_id
+                    }
+        
+               )
+        form = PlaylistForm()
+        return render(
+                    request, 
+                    'create_playlist.html',
+                    context={
+                        'form': form,
+                        'api_key': api_key,
+                        'username': user_name,
+                        'city_id':city_id,
+                        'weather_type': weather
                     }
                 )
-        except SpotifyException as e:
-            logger.error(f"Spotify authorization failed: {e}")
-            return render(request, 'error.html', {'error_message': 'Spotify authorization failed. Please try again.'}, status=401)
+    except SpotifyException as e:
+        logger.error(f"Spotify authorization failed: {e}")
+        return render(request, 'error.html', {'error_message': 'Spotify authorization failed. Please try again.'}, status=401)
 
-        except ow_exceptions.PyOWMError as e:
-            logger.error(f"Weather data retrieval failed: {e}")
-            return render(request, 'error.html', {'error_message': 'Weather data retrieval failed. Please try again later.'}, status=500)
-        
-        except Exception as e:
-            logger.error(f"An error occurred: {e}")
-            return render(request, 'error.html', {'error_message': 'An unexpected error occurred. Please try again later.'}, status=500)
+    except ow_exceptions.PyOWMError as e:
+        logger.error(f"Weather data retrieval failed: {e}")
+        return render(request, 'error.html', {'error_message': 'Weather data retrieval failed. Please try again later.'}, status=500)
     
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+        return render(request, 'error.html', {'error_message': 'An unexpected error occurred. Please try again later.'}, status=500)
     
+
 
 def created(request):
 
