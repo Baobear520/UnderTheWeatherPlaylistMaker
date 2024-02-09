@@ -6,8 +6,6 @@ name = "pypi"
 [packages]
 django = "*"
 spotipy = "*"
-pyowm = "*"
-geocoder = "*"
 gunicorn = "*"
 whitenoise = "*"
 
