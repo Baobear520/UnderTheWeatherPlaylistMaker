@@ -1,8 +1,11 @@
 import logging
 from django.shortcuts import redirect, render
+from django.views.decorators.cache import cache_page
+
 from spotipy import Spotify, DjangoSessionCacheHandler
 from spotipy.oauth2 import SpotifyOAuth
 from pyowm.commons import exceptions as ow_exceptions
+
 from config.settings.base import OWM_API_KEY
 from .scripts.user_data import get_user_info
 from .scripts.create_populate_playlist import *
@@ -55,6 +58,8 @@ def authenticate(request):
 
     return render(request, "login.html", context)
 
+
+@cache_page(5*60)
 def login_success(request):
     cache_handler = DjangoSessionCacheHandler(request)
     auth_manager = SpotifyOAuth(
@@ -84,7 +89,7 @@ def about(request):
 def contacts(request):
     return render(request,'contacts.html')
 
-
+@cache_page(5*60)
 def create_playlist(request):
     try:
         api_key = OWM_API_KEY
@@ -192,7 +197,7 @@ def create_playlist(request):
         return render(request, 'error.html', {'error_message': 'An unexpected error occurred. Please try again later.'}, status=500)
     
 
-
+@cache_page(5*60)
 def created(request):
 
     #Grab these variables to pass into the template
@@ -206,3 +211,6 @@ def created(request):
             'playlist_name':playlist_name
             }
         )
+@cache_page(5*60)
+def show_data(request):
+    return render(request,"contacts.html")

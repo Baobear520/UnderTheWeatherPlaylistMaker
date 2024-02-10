@@ -12,4 +12,5 @@ urlpatterns = [
     path('create-playlist/success',view=views.created,name='created'), 
     path('contacts',view=views.contacts,name='contacts'),
     path('about',view=views.about,name='about'),
+    path('cache',view=views.show_data,name='cache')
 ]

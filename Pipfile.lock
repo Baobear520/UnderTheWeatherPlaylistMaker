@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "2755048a8676f4e8a3af195977f45969f5a2722b674586fbf88e2cb02ccbf326"
+            "sha256": "99b44f3e7463e2c8612a25dcc07daf3326af600caa3437bd053f2e18c691048c"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -136,6 +136,13 @@
             "index": "pypi",
             "version": "==5.0.2"
         },
+        "geojson": {
+            "hashes": [
+                "sha256:6e4bb7ace4226a45d9c8c8b1348b3fc43540658359f93c3f7e03efa9f15f658a",
+                "sha256:ccbd13368dd728f4e4f13ffe6aaf725b6e802c692ba0dde628be475040c534ba"
+            ],
+            "version": "==2.5.0"
+        },
         "gunicorn": {
             "hashes": [
                 "sha256:3213aa5e8c24949e792bcacfc176fef362e7aac80b76c56f6b5122bf350722f0",
@@ -159,6 +166,26 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==23.2"
+        },
+        "pyowm": {
+            "hashes": [
+                "sha256:1a4dbca50c5856044de635df3c4f70c334bbba130ce8fb43eaf2892b1a4d7010",
+                "sha256:7ae83dad89998952b7244df89876732dc23c00e011defb9b64ec3e28c62ac76f",
+                "sha256:8196f77c91eac680676ed5ee484aae8a165408055e3e2b28025cbf60b8681e03",
+                "sha256:86463108e7613171531ba306040b43c972b3fc0b0acf73b12c50910cdd2107ab",
+                "sha256:c73dcf590ced0860e5b39fb43f56098329ef6b479526f91e558e677b1dd5cc37"
+            ],
+            "index": "pypi",
+            "version": "==3.3.0"
+        },
+        "pysocks": {
+            "hashes": [
+                "sha256:08e69f092cc6dbe92a0fdd16eeb9b9ffbc13cadfe5ca4c7bd92ffb078b293299",
+                "sha256:2725bd0a9925919b9b51739eea5f9e2bae91e83288108a9ad338b2e3a4435ee5",
+                "sha256:3f8804571ebe159c380ac6de37643bb4685970655d3bba243530d6558b799aa0"
+            ],
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
+            "version": "==1.7.1"
         },
         "redis": {
             "hashes": [
