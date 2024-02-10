@@ -9,6 +9,7 @@ spotipy = "*"
 gunicorn = "*"
 whitenoise = "*"
 pyowm = "*"
+django-redis = "*"
 
 [dev-packages]
 

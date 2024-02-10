@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "99b44f3e7463e2c8612a25dcc07daf3326af600caa3437bd053f2e18c691048c"
+            "sha256": "17d35145b238a121920245ada87d7eeb1fde155ac19799a0ad1b7f797ab262a1"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -135,6 +135,14 @@
             ],
             "index": "pypi",
             "version": "==5.0.2"
+        },
+        "django-redis": {
+            "hashes": [
+                "sha256:6a02abaa34b0fea8bf9b707d2c363ab6adc7409950b2db93602e6cb292818c42",
+                "sha256:ebc88df7da810732e2af9987f7f426c96204bf89319df4c6da6ca9a2942edd5b"
+            ],
+            "index": "pypi",
+            "version": "==5.4.0"
         },
         "geojson": {
             "hashes": [
