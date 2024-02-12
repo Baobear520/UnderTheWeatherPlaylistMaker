@@ -7,11 +7,13 @@ from spotipy.oauth2 import SpotifyOAuth
 from pyowm.commons import exceptions as ow_exceptions
 
 from config.settings.base import OWM_API_KEY
+
 from .scripts.user_data import get_user_info
 from .scripts.create_populate_playlist import *
 from .scripts.playlist_algorithms import get_shortlisted_tracks
 from .scripts.weather import city_ID,weather_type,get_owm_mng
 from .forms import PlaylistForm
+
 
 
 
@@ -59,7 +61,7 @@ def authenticate(request):
     return render(request, "login.html", context)
 
 
-@cache_page(5*60)
+@cache_page(60)
 def login_success(request):
     cache_handler = DjangoSessionCacheHandler(request)
     auth_manager = SpotifyOAuth(
@@ -89,11 +91,10 @@ def about(request):
 def contacts(request):
     return render(request,'contacts.html')
 
-@cache_page(5*60)
+@cache_page(60)
 def create_playlist(request):
     try:
-        api_key = OWM_API_KEY
-
+        #Obtaining geo coordinates in case of different HTTP requests
         if request.method == 'GET':
             # Obtain coordinates for the weather API
             lat = float(request.GET.get('lat'))
@@ -107,26 +108,35 @@ def create_playlist(request):
             lat = request.session.get('lat')
             lon = request.session.get('lon')
 
+        
+        #Obtaining API key for OpenWeatherAPI calls
+        api_key = OWM_API_KEY
         mng = get_owm_mng(api_key)
 
         # Obtain weather data for the widget and further use
         weather, status = weather_type(mng, lat, lon)
         city_id = city_ID(mng, lat, lon)
 
+        #Obtaining credentials from cache
         cache_handler = DjangoSessionCacheHandler(request)
         auth_manager = SpotifyOAuth(
             scope='user-library-read user-top-read playlist-modify-public',
             cache_handler=cache_handler)
 
+        #If there's no cached token, redirecting back to login url
         if not auth_manager.validate_token(cache_handler.get_cached_token()):
             return redirect('login')
-
+        
+        #Else we defined an sp - object
         sp = Spotify(auth_manager=auth_manager)
+
+        #Grabbing username and user id from sessions
         user_name = request.session.get('username', None)
         user_id = request.session.get('user_id', None)
 
+        
+        
         if request.method == 'POST':
-            
             #Instantiate a PlaylistForm class with data from user's input
             form = PlaylistForm(request.POST,sp=sp)
             if form.is_valid(): #If user's input is valid, grab the value
@@ -134,9 +144,10 @@ def create_playlist(request):
             
                 #Passing the playlist name into sessions
                 request.session['playlist_name'] = playlist_name
-                #Generate recommended tracks according to the weather and user's taste
+
+                #Generating recommended tracks according to the weather and user's taste
                 items_id = get_shortlisted_tracks(sp,weather,status)
-                
+    
                 if items_id == []:
                     return render(request, 'error.html', {"error_message": "Couldn't find any tracks for you. Check your Internet connection or try again later."}, status=404)
 
@@ -152,6 +163,7 @@ def create_playlist(request):
                 request.session['spotify_link'] = playlist_url
                 
                 #Adding generated tracks into the new playlist
+                
                 new_playlist = add_tracks_to_playlist(sp,playlist_id,items_id)
                 if not new_playlist:
                     return render(request, 'error.html', {"error_message": "Couldn't add tracks to {playlist_name} playlist.Make sure you're connected to Internet."}, status=404)
@@ -211,6 +223,6 @@ def created(request):
             'playlist_name':playlist_name
             }
         )
-@cache_page(5*60)
+@cache_page(60)
 def show_data(request):
     return render(request,"contacts.html")
