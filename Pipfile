@@ -12,6 +12,7 @@ pyowm = "*"
 django-redis = "*"
 redis = "*"
 celery = "*"
+locust = "*"
 
 [dev-packages]
 

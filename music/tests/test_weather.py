@@ -6,7 +6,7 @@ from ..scripts.weather import *
 
 class GetOwmAccessTestCase(TestCase):
 
-    """Class for testsing authentification in OpenWeather API"""
+    """Class for testing authentification in OpenWeather API"""
 
     @patch('music.scripts.weather.get_owm_mng')
     def test_get_owm_failded_returns_none(self,func):
@@ -19,11 +19,6 @@ class GetOwmAccessTestCase(TestCase):
         self.assertIsNone(mng)
         with self.assertRaises(AssertionError):
             func(api_key=None)
-
-
-    
-        
-        
 
 
 class WeatherStatusTestCase(TestCase):
