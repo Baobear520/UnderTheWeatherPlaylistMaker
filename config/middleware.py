@@ -11,9 +11,19 @@ def is_user_authenticated(get_response):
     # Initialize request.code because we'll be using that in the login function in views.py
     def middleware(request):
         request.code = None
-        if "authenticate" not in request.path:
-            # If the current path is not /authenticate then we run this
 
+        #Define public endpoints
+        public_endpoints = ["about","contacts","test"]
+
+        #Return response if one of the URLs is requested
+        for p in public_endpoints:
+            if p in request.path:
+                response = get_response(request)
+                return response
+            
+        # If the current path is not /authenticate
+        if "authenticate" not in request.path:
+             
             # In the function authenticate in views.py, we passed context["auth_url"] to
             # the html so the user can press the link and get sent to the spotify
             # authentication page, once they accept/refuse they will get redirected back

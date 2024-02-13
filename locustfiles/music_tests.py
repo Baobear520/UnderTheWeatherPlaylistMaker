@@ -7,17 +7,24 @@ class WebsiteUser(HttpUser):
 
     wait_time = between(1,5)
 
-    @task(1)
+    @task(2)
+    def test_page(self):
+        self.client.get("/test",name='test')
+        
+"""
+    @task
     def authenticate(self):
-        self.client.get("/authenticate",name='authenticate')
+        response = self.client.get("/authenticate",name='authenticate')
+        res = response.json()
+        print(res)
 
-    @task(1)
-    def login(self):
+
+    def on_start(self):
         self.client.get("/",name='login')
 
     @task(5)
     def login_success(self):
-        self.client.get("/login/success",name='login-success')
+        self.client.get("/login/success",name='login/success')
     
     @task(5)
     def create_playlist(self):
@@ -30,6 +37,8 @@ class WebsiteUser(HttpUser):
 
     @task(3)
     def create_playlist_success(self):
-        self.client.get("/create-playlist/success",name='created')
+        self.client.get("/create-playlist/success",name='create-playlist/success')
         
-    
+"""
+
+        

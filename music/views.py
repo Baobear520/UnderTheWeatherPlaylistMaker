@@ -1,4 +1,5 @@
 import logging
+import time
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page
 
@@ -48,7 +49,7 @@ def authenticate(request):
         # If token already exists and is valid, redirect them to the home page
         return redirect("login-success")
 
-    # Make sure your client_id/client_secret/redirect_uri environment variables are set
+    
     auth_manager = SpotifyOAuth(
         scope='user-library-read user-top-read playlist-modify-public',
         cache_handler=cache_handler,
@@ -61,7 +62,7 @@ def authenticate(request):
     return render(request, "login.html", context)
 
 
-@cache_page(60)
+#@cache_page(60)
 def login_success(request):
     cache_handler = DjangoSessionCacheHandler(request)
     auth_manager = SpotifyOAuth(
@@ -84,14 +85,15 @@ def login_success(request):
         'login_success.html',
         context={'username':user_name,'user_id':user_id})
 
+#@cache_page(5*60)
 def about(request):
     return render(request,'about.html')
 
-
+#@cache_page(5*60)
 def contacts(request):
     return render(request,'contacts.html')
 
-@cache_page(60)
+#@cache_page(60)
 def create_playlist(request):
     try:
         #Obtaining geo coordinates in case of different HTTP requests
@@ -209,7 +211,7 @@ def create_playlist(request):
         return render(request, 'error.html', {'error_message': 'An unexpected error occurred. Please try again later.'}, status=500)
     
 
-@cache_page(5*60)
+#@cache_page(5*60)
 def created(request):
 
     #Grab these variables to pass into the template
@@ -223,6 +225,6 @@ def created(request):
             'playlist_name':playlist_name
             }
         )
-@cache_page(60)
-def show_data(request):
+#@cache_page(60)
+def test_page(request):
     return render(request,"contacts.html")
