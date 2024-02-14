@@ -1,13 +1,18 @@
 import logging
+from random import uniform
 import time
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page
+import requests
 
+import spotipy
 from spotipy import Spotify, DjangoSessionCacheHandler
 from spotipy.oauth2 import SpotifyOAuth
 from pyowm.commons import exceptions as ow_exceptions
 
 from config.settings.base import OWM_API_KEY
+from config.tasks import tracks_task, weather_task
+
 
 from .scripts.user_data import get_user_info
 from .scripts.create_populate_playlist import *
@@ -136,6 +141,8 @@ def create_playlist(request):
         user_name = request.session.get('username', None)
         user_id = request.session.get('user_id', None)
 
+        #Generating recommended tracks according to the weather and user's taste
+        items_id = get_shortlisted_tracks(sp,weather,status)
         
         
         if request.method == 'POST':
@@ -144,12 +151,10 @@ def create_playlist(request):
             if form.is_valid(): #If user's input is valid, grab the value
                 playlist_name = form.cleaned_data['playlist_name']
             
-                #Passing the playlist name into sessions
+                #Passing the playlist name into sessions for the further use in /login/success url
                 request.session['playlist_name'] = playlist_name
 
-                #Generating recommended tracks according to the weather and user's taste
-                items_id = get_shortlisted_tracks(sp,weather,status)
-    
+                
                 if items_id == []:
                     return render(request, 'error.html', {"error_message": "Couldn't find any tracks for you. Check your Internet connection or try again later."}, status=404)
 
@@ -225,6 +230,13 @@ def created(request):
             'playlist_name':playlist_name
             }
         )
-#@cache_page(60)
+#@cache_page(3*60)
 def test_page(request):
-    return render(request,"contacts.html")
+    
+    try:
+        
+        return render(request,"test.html",context={**weather_data,'items_id':items_id})
+    
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+        return render(request, 'error.html', {'error_message': 'An unexpected error occurred. Please try again later.'}, status=500)
