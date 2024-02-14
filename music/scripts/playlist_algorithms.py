@@ -50,10 +50,10 @@ def get_recommended_tracks(sp,weather):
         #Obtain data for track recommendation search
         all_genres = get_all_genres(sp)
         genres = get_top_genres_from_artists(sp)
-        pop_genres_names = sort_top_genres(sp,genres)
-        top_genres = validate_genres_for_playlist(sp,all_genres,pop_genres_names)
-        random_seed_genres = add_random_genres(sp,all_genres,top_genres)
-        seed_genres = combined_genres(sp,top_genres,random_seed_genres)
+        pop_genres_names = sort_top_genres(genres)
+        top_genres = validate_genres_for_playlist(all_genres,pop_genres_names)
+        random_seed_genres = add_random_genres(all_genres,top_genres)
+        seed_genres = combined_genres(top_genres,random_seed_genres)
         criterea = define_criterea(weather)
 
         #Search for track recommendations on Spotify

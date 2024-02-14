@@ -5,9 +5,9 @@ from locust import HttpUser, task, between
 class WebsiteUser(HttpUser):
     """A class for performance testing endpoints"""
 
-    wait_time = between(1,5)
+    wait_time = between(1,3)
 
-    @task(2)
+    @task
     def test_page(self):
         self.client.get("/test",name='test')
         
