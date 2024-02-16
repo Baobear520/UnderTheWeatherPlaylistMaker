@@ -10,7 +10,6 @@ class PlaylistForm(forms.Form):
         )
     )
  
-
     def __init__(self, *args, **kwargs):
         # Pass the 'sp' object to the form's constructor
         self.sp = kwargs.pop('sp', None)
@@ -20,9 +19,10 @@ class PlaylistForm(forms.Form):
         playlist_name = self.cleaned_data['playlist_name']
         if self.sp is not None:
             all_playlists_names = get_all_playlists_names(self.sp)
+            # Check if the playlist name already exists
             if playlist_name in all_playlists_names:
                 raise forms.ValidationError(
-                    message='Playlist with this name already exists',)
+                    message='Playlist with this name already exists')
         return playlist_name
 
 

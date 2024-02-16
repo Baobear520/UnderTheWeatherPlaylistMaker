@@ -1,4 +1,5 @@
 import logging
+import os
 from random import uniform
 import time
 from django.shortcuts import redirect, render
@@ -11,7 +12,7 @@ from spotipy.oauth2 import SpotifyOAuth
 from pyowm.commons import exceptions as ow_exceptions
 
 from config.settings.base import OWM_API_KEY
-from config.tasks import weather_task
+from config.tasks import tracks_task, weather_task
 
 
 from .scripts.user_data import get_user_info
@@ -117,6 +118,7 @@ def create_playlist(request):
 
         
         #Obtaining API key for OpenWeatherAPI calls
+        #Delegating it to a celery task
         weather_data = weather_task.delay(lat,lon).get()
         weather = weather_data['weather']
         status = weather_data['status']
@@ -128,8 +130,12 @@ def create_playlist(request):
             scope='user-library-read user-top-read playlist-modify-public',
             cache_handler=cache_handler)
 
+        #Obtaining JSON serializable access token(to further pass into a celery task)
+        access_token = cache_handler.get_cached_token()
+        auth_info = access_token['access_token']
+        
         #If there's no cached token, redirecting back to login url
-        if not auth_manager.validate_token(cache_handler.get_cached_token()):
+        if not auth_manager.validate_token(access_token):
             return redirect('login')
         
         #Else we defined an sp - object
@@ -140,8 +146,8 @@ def create_playlist(request):
         user_id = request.session.get('user_id', None)
 
         #Generating recommended tracks according to the weather and user's taste
-        items_id = get_shortlisted_tracks(sp,weather,status)
-        
+        #Sending this task to celery
+        items_id = tracks_task.delay(auth_info,weather,status).get()
         
         if request.method == 'POST':
             #Instantiate a PlaylistForm class with data from user's input
@@ -151,7 +157,8 @@ def create_playlist(request):
             
                 #Passing the playlist name into sessions for the further use in /login/success url
                 request.session['playlist_name'] = playlist_name
-
+                
+                #If no tracks are retrieved
                 if items_id == []:
                     return render(request, 'error.html', {"error_message": "Couldn't find any tracks for you. Check your Internet connection or try again later."}, status=404)
 
@@ -228,34 +235,6 @@ def created(request):
         )
 #@cache_page(3*60)
 def test_page(request):
+    return render(request,"test.html")
     
-    try:
-        form = PlaylistForm()
-        weather_data = weather_task.delay().get()
-        weather = weather_data['weather']
-        status = weather_data['status']
-
-        #Grabbing username and user id from sessions
-        user_name = request.session.get('username', None)
-        user_id = request.session.get('user_id', None)
-
-        #Generating recommended tracks according to the weather and user's taste
-        auth_manager = SpotifyOAuth(
-            scope='user-library-read user-top-read playlist-modify-public')
-        sp = spotipy.Spotify(auth_manager=auth_manager)
-
-        items_id = get_shortlisted_tracks(sp,weather,status)
-
-        return render(
-                    request, 
-                    'create_playlist.html',
-                    context={
-                        'form': form,
-                        'username': user_name,
-                        **weather_data 
-                    }
-                )
     
-    except Exception as e:
-        logger.error(f"An error occurred: {e}")
-        return render(request, 'error.html', {'error_message': 'An unexpected error occurred. Please try again later.'}, status=500)

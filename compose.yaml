@@ -19,12 +19,20 @@ services:
     environment:
       - DJANGO_LOG_LEVEL
       - SPOTIPY_CLIENT_ID
-      - SPOTIPY_CLIENT_SECRET 
+      - SPOTIPY_CLIENT_SECRET
+      - SPOTIPY_REDIRECT_URI  
       - OPENWEATHER_API_KEY
+    depends_on:
+      - redis
     develop:
       watch:
         - action: rebuild
           path: .
+  
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
 
 
  
