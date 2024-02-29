@@ -1,7 +1,7 @@
 import logging
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page
-
+from django.core.cache import cache
 from spotipy import Spotify, DjangoSessionCacheHandler
 from spotipy.oauth2 import SpotifyOAuth
 from pyowm.commons import exceptions as ow_exceptions
@@ -94,7 +94,7 @@ def about(request):
 def contacts(request):
     return render(request,'contacts.html')
 
-@cache_page(3*60)
+#@cache_page(3*60)
 def create_playlist(request):
     try:
         #Obtaining geo coordinates in case of different HTTP requests
@@ -102,7 +102,7 @@ def create_playlist(request):
             # Obtain coordinates for the weather API
             lat = float(request.GET.get('lat'))
             lon = float(request.GET.get('lon'))
-
+            
             request.session['lat'] = lat
             request.session['lon'] = lon
 
@@ -114,11 +114,13 @@ def create_playlist(request):
         
         #Obtaining API key for OpenWeatherAPI calls
         #Delegating it to a celery task
-        weather_data = weather_task.delay(lat,lon).get()
+        weather_data = cache.get('weather_data',{})
+        if not weather_data:
+            weather_data = weather_task.delay(lat,lon).get()
+            cache.set('weather_data',weather_data,timeout=180)
+
         weather = weather_data['weather']
         status = weather_data['status']
-
-        
         #Obtaining credentials from cache
         cache_handler = DjangoSessionCacheHandler(request)
         auth_manager = SpotifyOAuth(
@@ -142,8 +144,11 @@ def create_playlist(request):
 
         #Generating recommended tracks according to the weather and user's taste
         #Sending this task to celery
-        items_id = tracks_task.delay(auth_info,weather,status).get()
-        
+        items_id = cache.get('items_id',[])
+        if not items_id:
+            items_id = tracks_task.delay(auth_info,weather,status).get()
+            cache.set('items_id',items_id,timeout=120)
+
         if request.method == 'POST':
             #Instantiate a PlaylistForm class with data from user's input
             form = PlaylistForm(request.POST,sp=sp)
