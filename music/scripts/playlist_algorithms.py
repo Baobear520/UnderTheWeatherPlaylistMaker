@@ -1,9 +1,7 @@
 import logging
-
 from .genres_algorithms import *
 from .user_data import get_top_genres_from_artists
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
+
   
 logger = logging.getLogger(__name__)
 
@@ -13,10 +11,10 @@ def define_criterea(weather):
     # Define criteria for songs that suit the playlist based on weather
     weather_criteria = {
         'Rainy': {
-            'max_danceability': 0.3,
-            'max_loudness': 0.5,
-            'max_energy': 0.5,
-            'max_valence': 0.3
+            'max_danceability': 0.5,
+            'max_loudness': 0.6,
+            'max_energy': 0.6,
+            'max_valence': 0.4
         },
         'Cloudy': {
             'max_danceability': 0.6,
@@ -37,7 +35,8 @@ def define_criterea(weather):
     }
     # Get recommended tracks based on the chosen genres and weather criteria
     try:
-        criteria = weather_criteria.get(weather,{})
+        criteria = weather_criteria.get(weather)
+        print(f"Criteria obtained: {criteria}")
         logger.info(f"Criteria obtained: {criteria}")
         return criteria 
     except Exception as e:
@@ -55,7 +54,7 @@ def get_recommended_tracks(sp,weather):
         random_seed_genres = add_random_genres(all_genres,top_genres)
         seed_genres = combined_genres(top_genres,random_seed_genres)
         criterea = define_criterea(weather)
-
+        
         #Search for track recommendations on Spotify
         data = sp.recommendations(
             **criterea,
@@ -120,8 +119,13 @@ def get_shortlisted_tracks(sp,weather,status):
         if number_of_final_tracks < 50:
             k == number_of_final_tracks
         
+        #Shuffling all the tracks to decrease probability of selecting the same tracks again
         random.shuffle(final_list)
+
+        #Shortening the list to 50 tracks
         short_list = final_list[:k]
+
+        print(f'Shortlisted {len(short_list)} randomly selected tracks from the final list')
         logger.info(f'Shortlisted {len(short_list)} randomly selected tracks from the final list')
         
         #Grab a list of track ID's

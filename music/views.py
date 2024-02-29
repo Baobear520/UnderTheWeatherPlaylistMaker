@@ -1,12 +1,7 @@
 import logging
-import os
-from random import uniform
-import time
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page
-import requests
 
-import spotipy
 from spotipy import Spotify, DjangoSessionCacheHandler
 from spotipy.oauth2 import SpotifyOAuth
 from pyowm.commons import exceptions as ow_exceptions
@@ -183,13 +178,14 @@ def create_playlist(request):
             
             #If the form is not valid, render the same page with error message from the form
             else:
-                
+                print(items_id)
                 return render(
                     request, 
                     'create_playlist.html',
                     context={
                         'form': form,
                         'username': user_name,
+                        'items_id': items_id,
                         **weather_data
                     }
         
@@ -201,6 +197,7 @@ def create_playlist(request):
                     context={
                         'form': form,
                         'username': user_name,
+                        'items_id': items_id,
                         **weather_data
                         
                         
