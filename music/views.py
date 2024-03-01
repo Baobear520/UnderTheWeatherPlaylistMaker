@@ -1,19 +1,18 @@
 import logging
+
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page
 from django.core.cache import cache
+
 from spotipy import Spotify, DjangoSessionCacheHandler
 from spotipy.oauth2 import SpotifyOAuth
 from pyowm.commons import exceptions as ow_exceptions
 
-from config.settings.base import OWM_API_KEY
 from config.tasks import tracks_task, weather_task
-
 
 from .scripts.user_data import get_user_info
 from .scripts.create_populate_playlist import *
-from .scripts.playlist_algorithms import get_shortlisted_tracks
-from .scripts.weather import city_ID,weather_type,get_owm_mng
+
 from .forms import PlaylistForm
 
 
@@ -63,38 +62,43 @@ def authenticate(request):
     return render(request, "login.html", context)
 
 
-@cache_page(60)
+@cache_page(60 * 2)
 def login_success(request):
-    cache_handler = DjangoSessionCacheHandler(request)
-    auth_manager = SpotifyOAuth(
-            scope='user-library-read user-top-read playlist-modify-public',
-            cache_handler=cache_handler)
-    if not auth_manager.validate_token(cache_handler.get_cached_token()):
-        return redirect('login')
-    sp = Spotify(auth_manager=auth_manager)
-        
-    #Grab user ID and user_name
-    user_id, user_name = get_user_info(sp)
+    try:
+        cache_handler = DjangoSessionCacheHandler(request)
+        auth_manager = SpotifyOAuth(
+                scope='user-library-read user-top-read playlist-modify-public',
+                cache_handler=cache_handler)
+        if not auth_manager.validate_token(cache_handler.get_cached_token()):
+            return redirect('login')
+        sp = Spotify(auth_manager=auth_manager)
+            
+        #Grab user ID and user_name
+        user_id, user_name = get_user_info(sp)
 
-    if not user_id and not user_name:
-        return render(request, 'error.html', 
-                {"error_message": "Couldn't get access to your profile information. Make sure you're connected to Internet."}, 
-                status=404)
-    request.session['username'] = user_name
-    request.session['user_id'] = user_id
-    return render(request,
-        'login_success.html',
-        context={'username':user_name,'user_id':user_id})
+        if not user_id and not user_name:
+            return render(request, 'error.html', 
+                    {"error_message": "Couldn't get access to your profile information. Make sure you're connected to Internet."}, 
+                    status=404)
+        request.session['username'] = user_name
+        request.session['user_id'] = user_id
+        return render(request,
+            'login_success.html',
+            context={'username':user_name,'user_id':user_id})
+    
+    except ConnectionError as e:
+        logger.error(f"Couldn't establsh connection to the cache database: {e}")
+        return render(request, 'error.html', {"error_message": "There's a problem connecting to the website. Please try again later."}, status=404)
 
-@cache_page(5*60)
+@cache_page(60 * 15)
 def about(request):
     return render(request,'about.html')
 
-@cache_page(5*60)
+@cache_page(60 * 15)
 def contacts(request):
     return render(request,'contacts.html')
 
-#@cache_page(3*60)
+
 def create_playlist(request):
     try:
         #Obtaining geo coordinates in case of different HTTP requests
@@ -112,15 +116,16 @@ def create_playlist(request):
             lon = request.session.get('lon')
 
         
-        #Obtaining API key for OpenWeatherAPI calls
-        #Delegating it to a celery task
-        weather_data = cache.get('weather_data',{})
-        if not weather_data:
-            weather_data = weather_task.delay(lat,lon).get()
-            cache.set('weather_data',weather_data,timeout=180)
-
+        #Obtaining weather and city_id if it's in cache
+        weather_data = cache.get('weather_data')
+        #Else making an API call 
+        if not weather_data: 
+            weather_data = weather_task.delay(lat,lon).get() #Delegating it to a celery task
+            cache.set('weather_data',weather_data,timeout=180) #Storing the value in cache
+        
         weather = weather_data['weather']
         status = weather_data['status']
+
         #Obtaining credentials from cache
         cache_handler = DjangoSessionCacheHandler(request)
         auth_manager = SpotifyOAuth(
@@ -143,12 +148,14 @@ def create_playlist(request):
         user_id = request.session.get('user_id', None)
 
         #Generating recommended tracks according to the weather and user's taste
-        #Sending this task to celery
-        items_id = cache.get('items_id',[])
-        if not items_id:
-            items_id = tracks_task.delay(auth_info,weather,status).get()
-            cache.set('items_id',items_id,timeout=120)
+        #If the value is in cache, retrieving
+        items_id = cache.get('items_id')
 
+        #Else making all the neccesary API calls and computations
+        if not items_id:
+            items_id = tracks_task.delay(auth_info,weather,status).get() #Sending this task to celery
+            cache.set('items_id',items_id,timeout=120) #Storing the value in cache
+        
         if request.method == 'POST':
             #Instantiate a PlaylistForm class with data from user's input
             form = PlaylistForm(request.POST,sp=sp)
@@ -166,6 +173,11 @@ def create_playlist(request):
                 playlist = create_new_playlist(sp,user_id,user_name,playlist_name,weather)
                 if not playlist:
                     return render(request, 'error.html', {"error_message": "Couldn't create a new playlist. Make sure you're connected to Internet"}, status=404)
+                
+                #Deleting the tracklist and the old playlist names from cache 
+                #in case user wants to immediately create another playlist
+                cache.delete('all_playlists_names')
+                cache.delete('items_id')
                 
                 playlist_id = playlist['id']
                 playlist_url = playlist['external_urls']['spotify']
@@ -221,7 +233,7 @@ def create_playlist(request):
         return render(request, 'error.html', {'error_message': 'An unexpected error occurred. Please try again later.'}, status=500)
     
 
-
+@cache_page(60 * 15)
 def created(request):
 
     #Grab these variables to pass into the template
