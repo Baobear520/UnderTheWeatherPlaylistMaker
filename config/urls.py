@@ -24,6 +24,7 @@ from music import urls as music_urls
 urlpatterns = [
     path('', include(music_urls),name='music'),
     path('admin/', admin.site.urls),
+    path('__debug__/', include("debug_toolbar.urls"))
     ]
 if settings.DEBUG == True:
     urlpatterns += staticfiles_urlpatterns()

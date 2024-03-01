@@ -8,6 +8,12 @@ django = "*"
 spotipy = "*"
 gunicorn = "*"
 whitenoise = "*"
+pyowm = "*"
+django-redis = "*"
+redis = "*"
+celery = "*"
+locust = "*"
+django-debug-toolbar = "*"
 
 [dev-packages]
 

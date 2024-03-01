@@ -6,15 +6,15 @@ from .user_data import get_top_genres_from_artists
 logger = logging.getLogger(__name__)
 
 
-def define_criterea(sp,weather):
+def define_criterea(weather):
     
     # Define criteria for songs that suit the playlist based on weather
     weather_criteria = {
         'Rainy': {
-            'max_danceability': 0.3,
-            'max_loudness': 0.5,
-            'max_energy': 0.5,
-            'max_valence': 0.3
+            'max_danceability': 0.5,
+            'max_loudness': 0.6,
+            'max_energy': 0.6,
+            'max_valence': 0.4
         },
         'Cloudy': {
             'max_danceability': 0.6,
@@ -35,7 +35,9 @@ def define_criterea(sp,weather):
     }
     # Get recommended tracks based on the chosen genres and weather criteria
     try:
-        criteria = weather_criteria.get(weather,{})
+        criteria = weather_criteria.get(weather)
+        print(f"Criteria obtained: {criteria}")
+        logger.info(f"Criteria obtained: {criteria}")
         return criteria 
     except Exception as e:
         logger.error(f"An unexpected error occurred: {e}")
@@ -47,12 +49,12 @@ def get_recommended_tracks(sp,weather):
         #Obtain data for track recommendation search
         all_genres = get_all_genres(sp)
         genres = get_top_genres_from_artists(sp)
-        pop_genres_names = sort_top_genres(sp,genres)
-        top_genres = validate_genres_for_playlist(sp,all_genres,pop_genres_names)
-        random_seed_genres = add_random_genres(sp,all_genres,top_genres)
-        seed_genres = combined_genres(sp,top_genres,random_seed_genres)
-        criterea = define_criterea(sp,weather)
-
+        pop_genres_names = sort_top_genres(genres)
+        top_genres = validate_genres_for_playlist(all_genres,pop_genres_names)
+        random_seed_genres = add_random_genres(all_genres,top_genres)
+        seed_genres = combined_genres(top_genres,random_seed_genres)
+        criterea = define_criterea(weather)
+        
         #Search for track recommendations on Spotify
         data = sp.recommendations(
             **criterea,
@@ -91,12 +93,14 @@ def get_word_search_tracks(sp,status):
 
 
 def generate_tracks(sp,weather,status):
+    logger.info(f"{generate_tracks.__name__} started execution")
     try:
         recommended_tracks = get_recommended_tracks(sp,weather)
         word_search_tracks = get_word_search_tracks(sp,status)
 
         # Combine recommended tracks and tracks from word search
         final_list = recommended_tracks + word_search_tracks
+        logger.info(f"Final list contains {len(final_list)} tracks")
         return final_list
     
     except TypeError as e:
@@ -105,16 +109,23 @@ def generate_tracks(sp,weather,status):
     except Exception as e:
         logger.error(f"An unexpected error occurred: {e}")
         return []
-    
+
+
 def get_shortlisted_tracks(sp,weather,status):
     try:
         final_list = generate_tracks(sp,weather,status)
-        number_of_final_tracks = len(final_list) 
+        number_of_final_tracks = len(final_list)
+        k = 50 
         if number_of_final_tracks < 50:
             k == number_of_final_tracks
-        k = 50
+        
+        #Shuffling all the tracks to decrease probability of selecting the same tracks again
         random.shuffle(final_list)
+
+        #Shortening the list to 50 tracks
         short_list = final_list[:k]
+
+        print(f'Shortlisted {len(short_list)} randomly selected tracks from the final list')
         logger.info(f'Shortlisted {len(short_list)} randomly selected tracks from the final list')
         
         #Grab a list of track ID's

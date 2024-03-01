@@ -20,7 +20,7 @@ def get_all_genres(sp):
     
 
 #Get a sorted list of the most popular genres (occur more than once)
-def sort_top_genres(sp, genres):
+def sort_top_genres(genres):
     try:
         popular_genres = {}
         #Loop through the list of all genres and add the key and value into the dict
@@ -49,7 +49,7 @@ def sort_top_genres(sp, genres):
         return []
 
 
-def validate_genres_for_playlist(sp,all_genres,pop_genres_names):
+def validate_genres_for_playlist(all_genres,pop_genres_names):
     #Validate that genres from top artist exist in the list of all the genres
     try:
         for g in pop_genres_names:
@@ -66,7 +66,7 @@ def validate_genres_for_playlist(sp,all_genres,pop_genres_names):
 
 
 #Select randomly chosen genres depending on the existing number of top_genres
-def add_random_genres(sp,all_genres,top_genres):
+def add_random_genres(all_genres,top_genres):
     number_of_top_genres = len(top_genres) #how many genres we got from user's info
     logger.info(f"Number of the most popular genres - {number_of_top_genres}")
     number_of_random_genres = 5 #max number of genre seeds used in sp.recommendations 
@@ -113,7 +113,7 @@ def add_random_genres(sp,all_genres,top_genres):
         return []
 
 #Combine selected genres
-def combined_genres(sp,top_genres,random_seed_genres):
+def combined_genres(top_genres,random_seed_genres):
     try:
         top_genres = top_genres[:3]
         logger.info(f"Top-3 most popular genres are {','.join(top_genres)}")

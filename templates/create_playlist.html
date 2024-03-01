@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+
 {% block extra_css %}
 <link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="{% static 'css/create_playlist.css' %}">
@@ -17,8 +18,8 @@
                 id: 9,
                 cityid: '{{city_id}}',appid: '{{api_key}}',units: 'metric',containerid: 'openweathermap-widget-9',  });  (function() {var script = document.createElement('script');script.async = true;script.charset = "utf-8";script.src = "//openweathermap.org/themes/openweathermap/assets/vendor/owm/js/weather-widget-generator.js";var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(script, s);  })();</script>
 
-        <p class="lead">It seems it's {{weather_type|lower}} today.</p>
-        <p class="lead">We've got tracks that could suit your mood. Let's try!</p>
+        <p class="lead">It seems it's {{weather|lower}} today.</p>
+        <p class="lead">We've got {{items_id|length}} tracks that could suit your mood. Let's try!</p>
         <p>
         <h4>Create playlist</h4></p>
         <form method="post" action="{% url 'create-playlist' %}">

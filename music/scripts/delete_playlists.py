@@ -10,6 +10,7 @@ def delete_all_playlists():
             scope='user-library-read user-top-read playlist-modify-public')
     sp = spotipy.Spotify(auth_manager=auth_manager)
     
+    
     try:
         all_playlists = sp.current_user_playlists()['items']
         for playlist in all_playlists:

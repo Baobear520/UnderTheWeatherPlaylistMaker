@@ -1,5 +1,32 @@
 {% extends "base.html" %}
 
 {% block content %}
+<h3>UnderTheWeather Spotify(c) playlist maker<h3/>
+
+<h6>
+    <p>
+        This web application helps Spotify users (both free and premium) 
+    create personalized playlists with tracks for the real-time weather at the user's location.<p/>
+<p> To recommend tracks for you, we'll need the music genres to choose from.
+    First,while you're loading the main page algorithm in the backend starts to scan throught your most playable artists 
+    and extracts the music genres that they belong to.
+    Next, it finds out what your top-3 genres are (let's say "rock", "pop", "dance"). 
+    To "spice up" things, it will add 2 random genres to them (they may be something like "k-pop" or "soundtrack")
+    so you would have a chance to explore the new stuff. So we got 5 genres to work with!<p>
+<p>Finally, here comes the weather part! The app will prompt you 
+    to allow it to obtain geo coordinates so the algorithm in the backend 
+    could get the weather contitions from www.openweathermap.org. Great!<p/>
+<p>Again, that smart algorithm in the backend will associate the weather condition 
+    with the certain audio features. Let's say that it's raining so you possibly feel a bit down 
+    and don't want anything fast and loud (that's subjective though).
+    So the web app would try to search for tracks with low dancebility, energy, loundness and valence
+    out of those 5 genres selected earlier plus ....oh my... 
+    it will search for the tracks that have "rain" in their names. Voila! The list of 50 tracks is ready!<p/>
+<p>The rest is simple. You input the desired playlist name (you must not have existing playlist with the same name)
+    and after some validation the app will populate this new playlist with our "moody" tracks.<p/>
+<p>After clicking the "Listen on Spotify" button you'll be redirected to www.spotify.com, 
+    right to the web page with the newly created playlist. <p/>
+<p>Time to enjoy!<p>
+<h6/>
 
 {% endblock %}
