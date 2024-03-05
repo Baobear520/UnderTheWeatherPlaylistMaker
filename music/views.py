@@ -1,4 +1,6 @@
+from datetime import datetime
 import logging
+from celery import chain
 
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page
@@ -8,13 +10,12 @@ from spotipy import Spotify, DjangoSessionCacheHandler
 from spotipy.oauth2 import SpotifyOAuth
 from pyowm.commons import exceptions as ow_exceptions
 
-from config.tasks import tracks_task, weather_task
+from config.tasks import generate_tracks_task, get_shortlisted_tracks_task, weather_task
 
 from .scripts.user_data import get_user_info
 from .scripts.create_populate_playlist import *
 
 from .forms import PlaylistForm
-
 
 
 
@@ -153,8 +154,11 @@ def create_playlist(request):
 
         #Else making all the neccesary API calls and computations
         if not items_id:
-            items_id = tracks_task.delay(auth_info,weather,status).get() #Sending this task to celery
+            #Calling a Celery chained tasks
+            res = chain(generate_tracks_task.s(auth_info,weather,status),get_shortlisted_tracks_task.s())()
+            items_id = res.get()
             cache.set('items_id',items_id,timeout=120) #Storing the value in cache
+        
         
         if request.method == 'POST':
             #Instantiate a PlaylistForm class with data from user's input
@@ -233,7 +237,6 @@ def create_playlist(request):
         return render(request, 'error.html', {'error_message': 'An unexpected error occurred. Please try again later.'}, status=500)
     
 
-@cache_page(60 * 15)
 def created(request):
 
     #Grab these variables to pass into the template
