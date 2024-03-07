@@ -1,4 +1,5 @@
 import logging
+
 from .genres_algorithms import *
 from .user_data import get_top_genres_from_artists
 
@@ -111,33 +112,7 @@ def generate_tracks(sp,weather,status):
         return []
 
 
-def get_shortlisted_tracks(sp,weather,status):
-    try:
-        final_list = generate_tracks(sp,weather,status)
-        number_of_final_tracks = len(final_list)
-        k = 50 
-        if number_of_final_tracks < 50:
-            k == number_of_final_tracks
-        
-        #Shuffling all the tracks to decrease probability of selecting the same tracks again
-        random.shuffle(final_list)
 
-        #Shortening the list to 50 tracks
-        short_list = final_list[:k]
-
-        print(f'Shortlisted {len(short_list)} randomly selected tracks from the final list')
-        logger.info(f'Shortlisted {len(short_list)} randomly selected tracks from the final list')
-        
-        #Grab a list of track ID's
-        items_id = [item['id'] for item in short_list]
-        return items_id
-    
-    except TypeError as e:
-        logger.error(f"{e}")
-        return []
-    except Exception as e:
-        logger.error(f"An unexpected error occurred: {e}")
-        return []
 
 
 
