@@ -30,7 +30,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'config.middleware.is_user_authenticated'
+    'config.middleware.is_user_authenticated',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -133,6 +133,10 @@ LOGGING = {
         }
     },
 }
+
+
+
+
 
 OWM_API_KEY = os.environ.get('OPENWEATHER_API_KEY')
 

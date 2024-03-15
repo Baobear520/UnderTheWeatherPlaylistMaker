@@ -14,7 +14,9 @@ logger = logging.getLogger(__name__)
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.dev')
 
-celery_app = Celery('config.tasks',backend='redis://127.0.0.1:6379/3')
+
+celery_app = Celery('config.tasks')
+
 
 celery_app.config_from_object('config.settings.dev',namespace='CELERY')
 celery_app.autodiscover_tasks()
